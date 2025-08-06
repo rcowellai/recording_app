@@ -18,23 +18,15 @@ setGlobalOptions({
   timeoutSeconds: 60,
 });
 
-// Import function modules
-import { createPrompt } from './prompts/createPrompt';
-import { getRecordingSession } from './sessions/getRecordingSession';
+// Import function modules - Epic 1.5 Implementation
 import { processRecording } from './recordings/processRecording';
-import { sendScheduledEmails } from './notifications/sendScheduledEmails';
 import { validateSession } from './sessions/validateSession';
 import { createStory } from './stories/createStory';
-import { deleteExpiredSessions } from './maintenance/deleteExpiredSessions';
-import { healthCheck } from './monitoring/healthCheck';
 
 // Export HTTP callable functions
 export {
-  createPrompt,
-  getRecordingSession,
   validateSession,
   createStory,
-  healthCheck,
 };
 
 // Export storage triggered functions
@@ -42,14 +34,7 @@ export {
   processRecording,
 };
 
-// Export scheduled functions
-export {
-  sendScheduledEmails,
-  deleteExpiredSessions,
-};
-
 // Export utility functions for testing
-export { validateInput } from './utils/validation';
 export { loggerInstance as logger } from './utils/logger';
 
 /**

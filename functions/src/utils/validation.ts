@@ -65,7 +65,7 @@ export const schemas = {
 /**
  * Validate input data against a schema
  */
-export function validateInput<T>(data: any, schema: Joi.Schema): T {
+export function validateInputData<T>(data: any, schema: Joi.Schema): T {
   const { error, value } = schema.validate(data, {
     abortEarly: false,
     stripUnknown: true,
@@ -246,6 +246,18 @@ export function validateResourceAccess(
 }
 
 /**
+ * Simple validation functions for Epic 1.5
+ */
+export const validateInput = {
+  isValidSessionId: (sessionId: string): boolean => {
+    return typeof sessionId === 'string' && 
+           sessionId.length >= 10 && 
+           sessionId.length <= 100 && 
+           /^[a-zA-Z0-9_-]+$/.test(sessionId);
+  }
+};
+
+/**
  * Comprehensive request validation middleware
  */
 export function validateRequest(
@@ -258,7 +270,7 @@ export function validateRequest(
   } = {}
 ): { userId?: string; validatedData: any } {
   const result: { userId?: string; validatedData: any } = {
-    validatedData: validateInput(data, schema),
+    validatedData: validateInputData(data, schema),
   };
   
   // Validate authentication if required
