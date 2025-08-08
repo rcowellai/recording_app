@@ -1,23 +1,25 @@
 # Love Retold Recording Integration - Vertical Slice Backlog
 
 ## Executive Summary
-**Project**: Transform Love Retold into complete memory recording platform  
-**Architecture**: Multi-app Firebase integration with external APIs  
-**Strategy**: Systematic wave orchestration with 4 progressive enhancement waves  
-**Timeline**: 20 days (4 waves × 5 days each)  
-**Complexity Score**: 0.9/1.0 (Enterprise-scale, multi-domain integration)
+**Project**: Recording interface for Love Retold couples' memory platform  
+**Architecture**: Single Firebase project integration with Love Retold platform  
+**Strategy**: Systematic wave orchestration with streamlined 3-wave approach  
+**Timeline**: 15 days (3 waves × 5 days each)  
+**Complexity Score**: 0.6/1.0 (Simplified integration, single-domain focus)
+
+**🎯 KEY CHANGE**: Unified with Love Retold's Firebase project eliminates dual-system complexity
 
 ---
 
 ## 🌊 Wave Orchestration Strategy
 
 ### Wave Activation Criteria ✅
-- **Complexity**: 0.9 (>>0.7 threshold)
-- **Scale**: 3 applications + Firebase backend  
-- **Domains**: Frontend, Backend, Infrastructure, External APIs, Email, Transcription
-- **Operation Types**: 6+ (Create, Integrate, Configure, Deploy, Test, Optimize)
-- **Files**: 50+ anticipated files across all systems
-- **Integration Points**: Firebase, OpenAI, Email services, existing Love Retold app
+- **Complexity**: 0.6 (moderate complexity, simplified integration)
+- **Scale**: Single recording application + shared Firebase project  
+- **Domains**: Frontend, Firebase Integration, Recording Pipeline
+- **Operation Types**: 4+ (Integrate, Configure, Deploy, Test)
+- **Files**: 20+ anticipated files in recording app
+- **Integration Points**: Love Retold Firebase project, MediaRecorder API
 
 ### Systematic Wave Strategy
 **Progressive Enhancement**: Each wave delivers complete user value while building toward full system  
@@ -27,10 +29,13 @@
 
 ---
 
-## 🎯 Wave 1: Core Recording Foundation (Days 1-5)
-**Value Delivered**: Basic audio recording with manual story creation  
-**Risk Mitigation**: Proves media recording, Firebase upload, cross-browser compatibility  
-**Validation Gate**: Can record audio, upload to Firebase, create viewable story
+## 🎯 Wave 1: Recording Proof-of-Concept - COMPLETED (Days 1-5)
+**Value Delivered**: Development environment + core recording functionality validation  
+**Risk Mitigation**: Proved MediaRecorder API, Firebase upload, cross-browser compatibility  
+**Validation Gate**: Recording engine works reliably (using separate Firebase for development)
+
+**📋 STATUS**: ✅ **COMPLETE** - Serves as development reference
+**⚠️ NOTE**: Used separate Firebase project (`love-retold-dev`) for development/testing
 
 ### Sprint Goals
 - [x] **Foundation**: Firebase project configured with security ✅ COMPLETE
@@ -481,579 +486,396 @@ npx playwright test
 
 ---
 
-## 🌊 Wave 2: Complete Recording Engine (Days 6-10)
-**Value Delivered**: Full recording pipeline with video + automated transcription  
-**Risk Mitigation**: Proves OpenAI integration, handles both audio/video workflows  
-**Validation Gate**: Complete recording-to-story pipeline with automated transcription
+## 🌊 Wave 2: Love Retold Integration & Recording Engine (Days 6-10)
+**Value Delivered**: Fully integrated recording interface connected to Love Retold platform  
+**Risk Mitigation**: Proves session management, Firebase integration, cross-browser recording pipeline  
+**Validation Gate**: Complete user journey from Love Retold prompt → record → automatic story creation
 
-### Sprint Goals
-- [x] **Video Recording**: Support both audio and video recording modes
-- [x] **Transcription**: Automated speech-to-text via OpenAI Whisper
-- [x] **Session Management**: Complete session lifecycle with proper security
-- [x] **Error Handling**: Robust error recovery and user feedback
+**Status**: ✅ READY TO EXECUTE - Love Retold integration specification received
+**Architecture**: Unified Firebase project eliminates dual-system complexity
 
-### 📋 Epic 2.1: Advanced Recording Capabilities
-**Priority**: CRITICAL | **Effort**: 10 points | **Risk**: HIGH
+### Sprint Goals - LOVE RETOLD INTEGRATION APPROVED
+- [ ] **Firebase Migration**: Connect to Love Retold's Firebase project (`love-retold-production`)
+- [ ] **Session Management**: Parse SESSION_ID, display prompts, handle status progression
+- [ ] **Recording Pipeline**: Chunked upload with MP4 codec to Love Retold storage paths
+- [ ] **Status Integration**: Real-time status updates during recording → processing flow
+- [ ] **Cross-Browser Support**: Edge codec fix, 98% browser compatibility
+- [ ] **UI Integration**: Love Retold branding, prompt display, professional interface
 
-#### 📹 Task 2.1.1: Video Recording Implementation
-- **Owner**: Frontend Engineer
-- **Dependencies**: Wave 1 complete
+### 📋 Epic 2.1: Love Retold Firebase Integration - NEW ARCHITECTURE
+**Priority**: CRITICAL | **Effort**: 10 points | **Risk**: MEDIUM
+**Architecture Status**: ✅ Love Retold integration specification received, ready to implement
+
+#### 🔧 Task 2.1.1: Firebase Configuration Migration - LOVE RETOLD SPEC
+- **Owner**: Backend Engineer
+- **Dependencies**: Wave 1 complete + Love Retold Firebase access
+- **Love Retold Requirements**:
+  - **Firebase Project**: `love-retold-production`
+  - **Session Collection**: `/recordingSessions/{sessionId}`
+  - **Storage Structure**: `/users/{userId}/recordings/{sessionId}/`
+  - **Security Rules**: Anonymous upload permissions (Love Retold provides)
 - **Acceptance Criteria**:
-  - [ ] Video recording with MediaRecorder API
-  - [ ] Camera selection (front/back on mobile)
-  - [ ] Audio + video combined recording
-  - [ ] Video preview and playback
-  - [ ] Handle orientation changes gracefully
-- **Definition of Done**: Can record, preview, and upload video files
-- **Mobile Testing**: iOS Safari, Android Chrome required
+  - [ ] Replace current Firebase config with Love Retold's project
+  - [ ] Test Firestore read access to recordingSessions collection
+  - [ ] Test Storage write access to user recording paths
+  - [ ] Verify security rules allow anonymous session access
+  - [ ] Update environment variables and deployment config
+- **Definition of Done**: Recording app connected to Love Retold's Firebase project
+- **Timeline**: 1-2 days (configuration + testing)
 
-#### 🎚️ Task 2.1.2: Enhanced Recording Controls
+#### 🔗 Task 2.1.2: SESSION_ID Management & Validation - LOVE RETOLD SPEC
 - **Owner**: Frontend Engineer
 - **Dependencies**: Task 2.1.1 complete
+- **Love Retold SESSION_ID Format**:
+  - **Structure**: `{randomPrefix}-{promptId}-{userId}-{storytellerId}-{timestamp}`
+  - **Example**: `x7k9m2q-prmt_abc123-usr_def456-stlr_ghi789-1704128400`
+  - **URL Format**: `https://record.loveretold.com/?session={SESSION_ID}`
 - **Acceptance Criteria**:
-  - [ ] Recording type selector (audio/video toggle)
-  - [ ] Recording timer display
-  - [ ] Pause/resume functionality for long recordings
-  - [ ] Recording quality settings
-  - [ ] Visual recording indicators (pulse animation)
-- **Definition of Done**: Recording interface matches UX mockups
+  - [ ] Parse SESSION_ID from URL query parameter
+  - [ ] Extract promptId, userId, storytellerId from SESSION_ID
+  - [ ] Query Firestore `/recordingSessions/{sessionId}` document
+  - [ ] Validate session status (pending/recording/completed/expired/deleted)
+  - [ ] Handle session validation errors with appropriate UI messages
+  - [ ] Display session data (prompt text, couple names, storyteller name)
+- **Definition of Done**: App can load and validate any Love Retold recording link
+- **Error Handling**: SESSION_NOT_FOUND, ALREADY_RECORDED, SESSION_EXPIRED, PROMPT_DELETED
 
-#### 🔄 Task 2.1.3: Re-recording Workflow
+#### 📤 Task 2.1.3: Love Retold Storage Integration - LOVE RETOLD SPEC
 - **Owner**: Frontend Engineer
 - **Dependencies**: Task 2.1.2 complete
+- **Love Retold Storage Architecture**:
+  - **Chunk Path**: `/users/{userId}/recordings/{sessionId}/chunks/chunk_{n}.mp4`
+  - **Final Path**: `/users/{userId}/recordings/{sessionId}/final/recording.mp4`
+  - **Metadata**: Include sessionId, chunkNumber, totalChunks in customMetadata
+  - **Status Updates**: Update recordingSession document with upload progress
 - **Acceptance Criteria**:
-  - [ ] "Start Over" functionality with confirmation dialog
-  - [ ] Clean up previous recording attempt
-  - [ ] Reset recording state properly
-  - [ ] Maintain session validity during re-recording
-- **Definition of Done**: Users can re-record without technical issues
+  - [ ] Upload chunks to Love Retold's storage structure during recording
+  - [ ] Include required metadata (sessionId, chunkNumber) with each chunk
+  - [ ] Update Firestore recordingSession with upload progress
+  - [ ] Assemble final recording at completion to /final/ path
+  - [ ] Handle Love Retold's error codes (UPLOAD_FAILED, QUOTA_EXCEEDED, etc.)
+  - [ ] Real-time progress updates in Firestore for Love Retold platform
+- **Definition of Done**: Recordings upload to Love Retold storage and trigger their processing
+- **Integration**: Love Retold platform automatically processes completed recordings
 
-### 📋 Epic 2.2: OpenAI Whisper Integration
-**Priority**: CRITICAL | **Effort**: 8 points | **Risk**: MEDIUM
+### 📋 Epic 2.2: Recording Pipeline & Status Management - LOVE RETOLD INTEGRATION
+**Priority**: CRITICAL | **Effort**: 8 points | **Risk**: LOW
+**Architecture Status**: ✅ Love Retold status progression defined, ready to implement
 
-#### 🧠 Task 2.2.1: OpenAI API Setup
-- **Owner**: Backend Engineer
-- **Dependencies**: Wave 1 complete
+#### 🎥 Task 2.2.1: MP4 Recording Engine & Browser Compatibility - APPROVED
+- **Owner**: Frontend Engineer
+- **Dependencies**: Epic 2.1 complete
+- **Recording Architecture**:
+  - **Unified Codec**: MP4 container with AAC audio and H264 video
+  - **Edge Fix**: Resolves current silent recording issue in Edge browser
+  - **Browser Support**: Chrome, Firefox, Safari, Edge (98% compatibility)
+  - **Duration Limit**: 15 minutes maximum recording time
 - **Acceptance Criteria**:
-  - [ ] OpenAI API key configured in Firebase environment
-  - [ ] Whisper API client integration in Cloud Functions
-  - [ ] Error handling for API failures
-  - [ ] Rate limiting and retry logic
-- **Definition of Done**: Can successfully call Whisper API from functions
+  - [ ] Replace current codec detection with MP4-first strategy
+  - [ ] Implement audio-only and video recording modes
+  - [ ] Fix Edge browser silent recording issue
+  - [ ] Cross-browser validation and testing
+  - [ ] 15-minute recording duration enforcement
+  - [ ] Recording quality optimized for speech/conversation
+- **Definition of Done**: 98% browser compatibility with reliable recordings
+- **Performance Target**: Edge recordings now work, <2% codec compatibility issues
 
-#### 📝 Task 2.2.2: Automated Transcription Function
-- **Owner**: Backend Engineer
+#### 📊 Task 2.2.2: Recording Status Management - LOVE RETOLD INTEGRATION
+- **Owner**: Frontend Engineer
 - **Dependencies**: Task 2.2.1 complete
+- **Love Retold Status Progression**:
+  - **pending** → **recording** → **processing** → **completed**
+  - **Error States**: **failed**, **expired**, **deleted**
+  - **Firestore Updates**: Real-time status updates during recording workflow
 - **Acceptance Criteria**:
-  - [ ] Replace manual transcript with Whisper API call
-  - [ ] Handle both audio and video file transcription
-  - [ ] Store original audio/video URLs in story document
-  - [ ] Fallback handling for transcription failures
-  - [ ] Transcript quality validation
-- **Definition of Done**: Stories automatically include accurate transcripts
+  - [ ] Update session status to 'recording' on recording start
+  - [ ] Update session status to 'processing' on upload completion
+  - [ ] Handle all error states with appropriate UI messages
+  - [ ] Real-time progress updates during chunked upload
+  - [ ] Implement Love Retold's error codes and messaging
+  - [ ] Status-based UI rendering (show different states appropriately)
+- **Definition of Done**: Recording app integrates seamlessly with Love Retold's status system
+- **Integration**: Love Retold platform monitors status and triggers transcription automatically
 
-#### ⚡ Task 2.2.3: Transcription Performance Optimization
-- **Owner**: Backend Engineer
-- **Dependencies**: Task 2.2.2 complete
-- **Acceptance Criteria**:
-  - [ ] Asynchronous processing for large files
-  - [ ] Progress updates for long transcription jobs
-  - [ ] File format optimization for Whisper
-  - [ ] Caching for re-processed files
-- **Definition of Done**: Transcription completes within 2 minutes for 5-minute recordings
 
-### 📋 Epic 2.3: Complete Session Management
-**Priority**: HIGH | **Effort**: 12 points | **Risk**: MEDIUM
-
-#### 🔐 Task 2.3.1: Session Security Enhancement
-- **Owner**: Backend Engineer
-- **Dependencies**: Wave 1 complete
-- **Acceptance Criteria**:
-  - [ ] Session expiration logic (7 days from creation)  
-  - [ ] Secure session ID generation
-  - [ ] Session status tracking (active/completed/expired)
-  - [ ] Anonymous authentication for recording sessions
-- **Definition of Done**: Sessions expire properly and show appropriate messages
-
-#### 📊 Task 2.3.2: Session State Management
-- **Owner**: Frontend Engineer
-- **Dependencies**: Task 2.3.1 complete
-- **Acceptance Criteria**:
-  - [ ] Handle all session states in UI (loading/active/expired/completed/error)
-  - [ ] Appropriate error messages for each state
-  - [ ] Loading states during session validation
-  - [ ] Graceful handling of network issues
-- **Definition of Done**: All session states show appropriate UI
-
-#### 🔗 Task 2.3.3: Session Creation Function
-- **Owner**: Backend Engineer
-- **Dependencies**: Task 2.3.1 complete
-- **Acceptance Criteria**:
-  - [ ] Cloud Function to create new recording sessions
-  - [ ] Generate unique URLs for each session
-  - [ ] Link sessions to questions/prompts
-  - [ ] Prevent duplicate sessions for same prompt
-- **Definition of Done**: Can programmatically create recording sessions
-
-### 📋 Epic 2.4: Error Handling & Recovery
+### 📋 Epic 2.3: Love Retold UI Integration & Branding - REQUIRED
 **Priority**: HIGH | **Effort**: 6 points | **Risk**: LOW
+**Architecture Status**: ✅ Love Retold prompt display format and branding requirements defined
 
-#### 🚨 Task 2.4.1: Comprehensive Error Handling
+#### 🎨 Task 2.3.1: Love Retold Prompt Display Integration - SPEC DEFINED
 - **Owner**: Frontend Engineer
-- **Dependencies**: Epic 2.1, 2.2 complete
+- **Dependencies**: Task 2.1.2 complete (session data available)
+- **Love Retold Display Requirements**:
+  - **Couple Names**: Display "Sarah & John" format prominently
+  - **Storyteller**: Show "Mom" or storyteller name for context
+  - **Prompt Text**: Display full prompt question clearly
+  - **Branding**: Love Retold logo and brand colors
+  - **Professional Layout**: Clean, relationship-focused design
 - **Acceptance Criteria**:
-  - [ ] Network failure recovery with retry mechanisms
-  - [ ] Device permission denial handling
-  - [ ] Storage quota exceeded handling
-  - [ ] Recording device issues (microphone/camera failures)
-  - [ ] User-friendly error messages for all scenarios
-- **Definition of Done**: App gracefully handles all common error scenarios
+  - [ ] Display couple names in Love Retold branding format
+  - [ ] Show storyteller name prominently for personal connection
+  - [ ] Render full prompt text clearly and prominently
+  - [ ] Implement Love Retold color scheme and branding
+  - [ ] Professional recording interface matching Love Retold design standards
+  - [ ] Responsive design for mobile and desktop
+- **Definition of Done**: Recording interface feels integrated with Love Retold platform
+- **Branding**: record.loveretold.com subdomain integration
 
-#### 📱 Task 2.4.2: Mobile-Specific Error Handling
+#### 📱 Task 2.3.2: Cross-Device Experience & Professional Polish - LOVE RETOLD STANDARD
+- **Owner**: Frontend Engineer  
+- **Dependencies**: Task 2.3.1 complete
+- **Love Retold Quality Standards**:
+  - **Cross-Device**: Works seamlessly on mobile and desktop browsers
+  - **Professional Feel**: Matches Love Retold's premium platform quality
+  - **Touch Optimization**: Large, accessible touch targets for mobile users
+  - **Loading States**: Professional loading and progress indicators
+- **Acceptance Criteria**:
+  - [ ] Responsive design optimized for mobile and desktop
+  - [ ] Professional loading states and progress indicators
+  - [ ] Touch-friendly controls and navigation
+  - [ ] Cross-browser compatibility testing (Chrome, Firefox, Safari, Edge)
+  - [ ] Professional animations and transitions
+  - [ ] Accessibility compliance (keyboard navigation, screen readers)
+- **Definition of Done**: Recording experience matches Love Retold platform quality standards
+- **Testing**: Multi-device and accessibility validation required
+
+#### ✨ Task 2.3.3: Recording UX & Final Integration Polish - PROFESSIONAL STANDARD
 - **Owner**: Frontend Engineer
+- **Dependencies**: Task 2.3.2 complete
+- **Professional Recording Experience**:
+  - **Preview & Re-record**: Allow users to review and re-record if needed
+  - **Progress Feedback**: Real-time upload progress and status updates
+  - **Error Handling**: User-friendly error messages and recovery options
+  - **Success Confirmation**: Clear completion messaging and next steps
+- **Acceptance Criteria**:
+  - [ ] Professional recording timer display (15-minute countdown)
+  - [ ] Preview recording with re-record option before final submission
+  - [ ] Real-time upload progress with Love Retold status integration
+  - [ ] Professional error handling with Love Retold error codes
+  - [ ] Success confirmation with appropriate next steps messaging
+  - [ ] Smooth state transitions throughout recording workflow
+- **Definition of Done**: Complete recording experience ready for production deployment
+- **Quality Target**: Professional user experience matching Love Retold platform standards
+
+### 📋 Epic 2.4: Cross-Browser Testing & Validation - CRITICAL
+**Priority**: CRITICAL | **Effort**: 6 points | **Risk**: MEDIUM
+**Architecture Status**: ✅ MP4 codec strategy addresses browser compatibility, validation required
+
+#### 🌐 Task 2.4.1: Multi-Browser Integration Testing - LOVE RETOLD REQUIREMENTS
+- **Owner**: QA Engineer + Frontend Engineer
+- **Dependencies**: All Wave 2 epics complete
+- **Love Retold Browser Support Requirements**:
+  - **Desktop**: Chrome, Firefox, Safari, Edge (latest versions)
+  - **Mobile**: iOS Safari, Chrome Mobile, Android Chrome
+  - **Target**: 98% compatibility for Love Retold user base
+  - **Edge Fix**: Resolve current silent recording issue with MP4 strategy
+- **Acceptance Criteria**:
+  - [ ] Complete user journey testing on all target browsers
+  - [ ] Session validation, recording, upload, and status progression
+  - [ ] Mobile-specific testing (touch interactions, orientation, permissions)
+  - [ ] Performance validation across browsers and devices
+  - [ ] Error handling consistency across all browsers
+  - [ ] Love Retold branding and UI consistency validation
+- **Definition of Done**: Recording app works reliably across all Love Retold target browsers
+- **Success Metric**: >98% recording success rate, Edge codec issue resolved
+
+#### 🚀 Task 2.4.2: Production Readiness & Deployment Preparation - FINAL STEP
+- **Owner**: DevOps + Frontend Engineer
 - **Dependencies**: Task 2.4.1 complete
+- **Love Retold Production Requirements**:
+  - **Subdomain Deployment**: Deploy to record.loveretold.com
+  - **Performance**: Handle 10-50 concurrent users efficiently
+  - **Monitoring**: Integration with Love Retold's monitoring systems
+  - **Security**: HTTPS, secure Firebase connections, error logging
 - **Acceptance Criteria**:
-  - [ ] iOS Safari-specific media handling
-  - [ ] Android Chrome media permission flows
-  - [ ] Battery optimization interference handling
-  - [ ] Background tab handling for long recordings
-- **Definition of Done**: Robust recording experience on mobile devices
+  - [ ] Deploy to record.loveretold.com subdomain
+  - [ ] Performance testing with concurrent users (10-50)
+  - [ ] Security validation (HTTPS, Firebase security rules)
+  - [ ] Error monitoring and logging integration
+  - [ ] Production Firebase configuration validation
+  - [ ] Love Retold team acceptance testing
+- **Definition of Done**: Recording app ready for production launch
+- **Success Criteria**: Love Retold team approves production deployment
 
-### Wave 2 Validation Checklist
-- [ ] **Recording Validation**: Both audio and video recording work reliably
-- [ ] **Transcription Validation**: OpenAI Whisper produces accurate transcripts
-- [ ] **Session Validation**: Complete session lifecycle works end-to-end
-- [ ] **Error Validation**: All error scenarios handled gracefully
-- [ ] **Performance Validation**: Transcription completes within acceptable time
-- [ ] **Mobile Validation**: Full functionality on iOS and Android
+### Wave 2 Validation Checklist - LOVE RETOLD INTEGRATION
+- [ ] **Firebase Integration**: Successfully connected to Love Retold's Firebase project
+- [ ] **Session Management**: SESSION_ID parsing, validation, and status progression working
+- [ ] **Recording Pipeline**: MP4 codec recording with chunked upload to Love Retold storage
+- [ ] **Status Integration**: Real-time status updates integrated with Love Retold platform
+- [ ] **UI Integration**: Love Retold branding, prompt display, and professional interface
+- [ ] **Cross-Browser Compatibility**: 98% browser compatibility including Edge codec fix
+- [ ] **Production Readiness**: Deployed to record.loveretold.com with Love Retold approval
 
-**Wave 2 Success Metrics**:
-- Video recording success rate: >85%
-- Transcription accuracy: >90% for clear audio
-- Session expiration handling: 100%
-- Mobile compatibility: 100% target devices
+**Wave 2 Success Metrics - LOVE RETOLD INTEGRATION**:
+- Love Retold Firebase integration: 100% functional connection
+- SESSION_ID management: 100% parsing and validation success
+- Recording success rate: >98% across all browsers (Edge codec fix)
+- Upload to Love Retold storage: >95% success rate with status integration
+- Cross-browser compatibility: 98% (Chrome, Firefox, Safari, Edge, Mobile)
+- Love Retold platform integration: Seamless user experience
+- Production deployment: record.loveretold.com live and approved
+
+**Wave 2 Delivery**:
+- Complete recording interface integrated with Love Retold platform
+- Automated transcription handled by Love Retold backend
+- Professional user experience matching Love Retold quality standards
+- Production-ready deployment on Love Retold subdomain
 
 ---
 
-## 🌊 Wave 3: Integration & Automation (Days 11-15)
-**Value Delivered**: Complete user journey from Love Retold prompt to email to story  
-**Risk Mitigation**: Proves email delivery, Love Retold integration, real-world workflows  
-**Validation Gate**: End-to-end user flow from existing Love Retold app works perfectly
+## 🌊 Wave 3: Testing, Optimization & Launch (Days 11-15)
+**Value Delivered**: Production-validated recording platform ready for Love Retold users  
+**Risk Mitigation**: Joint testing with Love Retold team, performance optimization, launch readiness  
+**Validation Gate**: Complete user journey from Love Retold platform works flawlessly in production
 
-### Sprint Goals
-- [x] **Email System**: Scheduled email delivery with recording links
-- [x] **Love Retold Integration**: "Record Now" buttons and "My Stories" section
-- [x] **Prompt Management**: Complete prompt lifecycle with status tracking
-- [x] **Real-time Updates**: Live sync between apps and Firebase
+### Sprint Goals - SIMPLIFIED INTEGRATION APPROACH
+- [ ] **Joint Testing**: End-to-end testing with Love Retold team using their test scenarios  
+- [ ] **Performance Optimization**: Production-level performance and monitoring
+- [ ] **Launch Preparation**: Final validation, documentation, and production deployment
+- [ ] **User Acceptance**: Love Retold team validates complete user experience
 
-### 📋 Epic 3.1: Email Notification System
-**Priority**: CRITICAL | **Effort**: 10 points | **Risk**: MEDIUM
+### 📋 Epic 3.1: Joint Testing & Validation - LOVE RETOLD COLLABORATION
+**Priority**: CRITICAL | **Effort**: 8 points | **Risk**: LOW
+**Architecture Status**: ✅ Love Retold test scenarios defined, ready for joint validation
 
-#### 📧 Task 3.1.1: Email Service Setup
-- **Owner**: Backend Engineer
+#### 🧪 Task 3.1.1: Love Retold Test Scenarios - JOINT TESTING
+- **Owner**: QA Engineer + Love Retold Team
 - **Dependencies**: Wave 2 complete
+- **Love Retold Test Scenarios** (from their specification):
+  - Happy path: Click link → Record → Upload → Transcribe → View story
+  - Re-recording: User wants to redo their recording
+  - Network interruption: Connection lost mid-upload
+  - Session expiry, deleted prompts, multiple devices
 - **Acceptance Criteria**:
-  - [ ] SendGrid or EmailJS account configured
-  - [ ] Email templates designed (HTML + text versions)
-  - [ ] Email service integration in Cloud Functions
-  - [ ] Unsubscribe handling and preferences
-- **Definition of Done**: Can send emails programmatically from functions
+  - [ ] Execute all Love Retold test scenarios successfully
+  - [ ] Validate session states: pending/recording/completed/expired/deleted
+  - [ ] Test error recovery and user experience
+  - [ ] Cross-device testing (desktop → mobile switching)
+  - [ ] Large file handling (15-minute recordings)
+  - [ ] Concurrent user testing
+- **Definition of Done**: All Love Retold test scenarios pass consistently
 
-#### ⏰ Task 3.1.2: Scheduled Email Function
-- **Owner**: Backend Engineer
+#### 📊 Task 3.1.2: End-to-End Integration Validation - PRODUCTION READY
+- **Owner**: Full-Stack Engineers + Love Retold Team
 - **Dependencies**: Task 3.1.1 complete
+- **Integration Validation Requirements**:
+  - Love Retold creates recording session → Recording app displays prompt
+  - Recording completion → Love Retold platform processes transcription
+  - Story creation → Available in Love Retold user interface
 - **Acceptance Criteria**:
-  - [ ] Cloud Scheduler configured for daily email checks
-  - [ ] Query prompts scheduled for current date
-  - [ ] Send emails with personalized recording links
-  - [ ] Update prompt status to "sent"
-  - [ ] Handle timezone considerations
-- **Definition of Done**: Daily scheduled emails sent automatically
+  - [ ] Complete user journey from Love Retold platform to recording completion
+  - [ ] Real-time status updates working between systems
+  - [ ] Love Retold transcription pipeline triggered correctly
+  - [ ] Stories appear in Love Retold user interface
+  - [ ] Error handling consistent across both systems
+  - [ ] Performance meets Love Retold requirements
+- **Definition of Done**: Seamless integration validated by both teams
 
-#### 📬 Task 3.1.3: Email Template & Personalization
-- **Owner**: Frontend Engineer + Designer
-- **Dependencies**: Task 3.1.1 complete
-- **Acceptance Criteria**:
-  - [ ] Mobile-responsive email templates
-  - [ ] Personalized greeting and question text
-  - [ ] Clear call-to-action button for recording
-  - [ ] Brand-consistent design with Love Retold
-  - [ ] Accessible email format
-- **Definition of Done**: Emails look professional and drive engagement
-
-### 📋 Epic 3.2: Love Retold Integration
-**Priority**: CRITICAL | **Effort**: 15 points | **Risk**: HIGH
-
-#### 🔧 Task 3.2.1: Firebase SDK Integration in Love Retold
-- **Owner**: Full-Stack Engineer
-- **Dependencies**: Wave 2 complete
-- **Acceptance Criteria**:
-  - [ ] Firebase SDK added to existing Love Retold app
-  - [ ] Authentication integration with existing user system
-  - [ ] Environment configuration for Firebase connection
-  - [ ] Firebase service initialization
-- **Definition of Done**: Love Retold app can connect to Firebase backend
-
-#### 📝 Task 3.2.2: Prompt Management Service Update
-- **Owner**: Full-Stack Engineer
-- **Dependencies**: Task 3.2.1 complete
-- **Acceptance Criteria**:
-  - [ ] Integrate `createPrompt` Cloud Function calls
-  - [ ] Real-time prompt status updates via Firestore listeners
-  - [ ] Generate unique recording URLs for each prompt
-  - [ ] Handle prompt deletion and cleanup
-- **Definition of Done**: Prompts created in Love Retold appear in Firebase
-
-#### 🎬 Task 3.2.3: "Record Now" Button Implementation
-- **Owner**: Frontend Engineer
-- **Dependencies**: Task 3.2.2 complete
-- **Acceptance Criteria**:
-  - [ ] Add "Record Now" buttons to existing prompt components
-  - [ ] Open recording app in new tab/window
-  - [ ] Handle popup blockers gracefully  
-  - [ ] Visual feedback when recording is in progress
-  - [ ] Update UI when recording is completed
-- **Definition of Done**: Users can click "Record Now" and complete recording workflow
-
-#### 📚 Task 3.2.4: "My Stories" Section Creation
-- **Owner**: Frontend Engineer
-- **Dependencies**: Task 3.2.2 complete
-- **Acceptance Criteria**:
-  - [ ] New "My Stories" page/section in Love Retold app
-  - [ ] Display completed stories with playback controls
-  - [ ] Show transcripts with original questions
-  - [ ] Download functionality for audio/video files
-  - [ ] Share functionality for stories
-- **Definition of Done**: Users can view, play, and manage their recorded stories
-
-### 📋 Epic 3.3: Prompt Lifecycle Management
-**Priority**: HIGH | **Effort**: 8 points | **Risk**: MEDIUM
-
-#### 🔄 Task 3.3.1: Complete Prompt Status Tracking
-- **Owner**: Backend Engineer
-- **Dependencies**: Epic 3.1, 3.2 in progress
-- **Acceptance Criteria**:
-  - [ ] Track prompt status: waiting → sent → completed
-  - [ ] Remove completed prompts from active list
-  - [ ] Handle prompt deletion with proper cleanup
-  - [ ] Archive completed prompts for history
-- **Definition of Done**: Prompt status accurately reflects current state
-
-#### 🔗 Task 3.3.2: Prompt-Story Relationship Management
-- **Owner**: Backend Engineer
-- **Dependencies**: Task 3.3.1 complete
-- **Acceptance Criteria**:
-  - [ ] Link completed recordings to original prompts
-  - [ ] Maintain referential integrity between collections
-  - [ ] Handle orphaned recordings gracefully
-  - [ ] Enable story lookup by original prompt
-- **Definition of Done**: Stories are properly linked to their source prompts
-
-### 📋 Epic 3.4: Real-time Synchronization
+### 📋 Epic 3.2: Performance Optimization & Production Readiness - FINAL POLISH
 **Priority**: HIGH | **Effort**: 6 points | **Risk**: LOW
+**Architecture Status**: ✅ Performance targets defined, optimization strategies ready
 
-#### ⚡ Task 3.4.1: Firestore Real-time Listeners
-- **Owner**: Frontend Engineer
+#### 🚀 Task 3.2.1: Production Performance Optimization - LOVE RETOLD REQUIREMENTS
+- **Owner**: Frontend Engineer + DevOps
+- **Dependencies**: Epic 3.1 complete
+- **Love Retold Performance Requirements**:
+  - Handle 10-50 concurrent users efficiently
+  - <2 second page load times on mobile
+  - <500MB memory usage for 15-minute recordings
+  - 99% uptime once deployed
+- **Acceptance Criteria**:
+  - [ ] Load testing with 50 concurrent users
+  - [ ] Memory usage profiling and optimization
+  - [ ] Page load time optimization (<2 seconds)
+  - [ ] CDN setup for static assets
+  - [ ] Performance monitoring implementation
+  - [ ] Error tracking and alerting setup
+- **Definition of Done**: Recording app meets Love Retold's production performance requirements
+
+#### 📚 Task 3.2.2: Documentation & Launch Preparation - FINAL DELIVERABLES
+- **Owner**: Technical Writer + DevOps
 - **Dependencies**: Task 3.2.1 complete
+- **Launch Preparation Requirements**:
+  - Complete technical documentation for Love Retold team
+  - Deployment guides and troubleshooting runbooks
+  - User acceptance testing sign-off
+  - Production deployment checklist
 - **Acceptance Criteria**:
-  - [ ] Real-time updates for prompt status changes
-  - [ ] Live notification when recordings are completed
-  - [ ] Sync recording progress across browser tabs
-  - [ ] Handle connection loss and reconnection
-- **Definition of Done**: UI updates automatically when data changes
+  - [ ] Technical integration documentation complete
+  - [ ] Deployment and troubleshooting runbooks created
+  - [ ] Love Retold team training and handoff completed
+  - [ ] Production deployment checklist validated
+  - [ ] Final user acceptance testing sign-off
+  - [ ] Go-live approval from Love Retold team
+- **Definition of Done**: Recording app ready for production launch with Love Retold approval
 
-#### 🔔 Task 3.4.2: User Notification System
-- **Owner**: Frontend Engineer
-- **Dependencies**: Task 3.4.1 complete
-- **Acceptance Criteria**:
-  - [ ] In-app notifications for completed recordings
-  - [ ] Toast notifications for important status changes
-  - [ ] Optional browser push notifications
-  - [ ] Notification preferences management
-- **Definition of Done**: Users are appropriately notified of important events
-
-### Wave 3 Validation Checklist
-- [ ] **Email Validation**: Scheduled emails sent and received successfully
-- [ ] **Integration Validation**: Love Retold → Recording App → Stories workflow complete
-- [ ] **Status Validation**: Prompt status accurately tracked throughout lifecycle
-- [ ] **Real-time Validation**: UI updates immediately reflect backend changes
-- [ ] **User Experience Validation**: Complete user journey feels seamless
-- [ ] **Cross-app Validation**: Data consistency across all applications
+### Wave 3 Validation Checklist - LAUNCH READINESS
+- [ ] **Joint Testing**: All Love Retold test scenarios pass consistently
+- [ ] **Performance Validation**: Production performance requirements met
+- [ ] **Integration Validation**: End-to-end user journey working flawlessly
+- [ ] **Documentation Complete**: Technical docs and runbooks ready
+- [ ] **Love Retold Approval**: User acceptance testing signed off
+- [ ] **Production Deployment**: record.loveretold.com live and stable
 
 **Wave 3 Success Metrics**:
-- Email delivery rate: >98%
-- Click-through rate from email to recording: >40%
-- Recording completion rate: >70%
-- Love Retold integration success: 100%
+- All Love Retold test scenarios: 100% pass rate
+- Production performance: <2s load times, handles 50 concurrent users
+- Integration reliability: 99%+ success rate for complete user journey
+- Love Retold team satisfaction: Full approval for production launch
+
+**Wave 3 Delivery**:
+- Production-validated recording platform
+- Complete integration with Love Retold platform
+- Documentation and support materials
+- Go-live approval and launch readiness
 
 ---
 
-## 🌊 Wave 4: Production Readiness (Days 16-20)
-**Value Delivered**: Enterprise-ready system with security, performance, monitoring  
-**Risk Mitigation**: Production security, scalability, compliance, monitoring  
-**Validation Gate**: System meets all production requirements and is launch-ready
+## 📊 Updated Project Summary - SIMPLIFIED INTEGRATION APPROACH
 
-### Sprint Goals
-- [x] **Security Hardening**: Production-ready security rules and validation
-- [x] **Performance Optimization**: Fast loading, efficient uploads, CDN setup
-- [x] **Monitoring & Analytics**: Comprehensive observability and error tracking
-- [x] **Launch Readiness**: Documentation, testing, deployment automation
+### Timeline Comparison
+**Original Plan**: 20 days (4 waves × 5 days each)  
+**Simplified Plan**: 15 days (3 waves × 5 days each)  
+**Savings**: 25% time reduction through unified Firebase approach
 
-### 📋 Epic 4.1: Security & Compliance
-**Priority**: CRITICAL | **Effort**: 10 points | **Risk**: HIGH
+### Complexity Reduction
+**Original Complexity**: 0.9/1.0 (Enterprise-scale, multi-domain)  
+**Simplified Complexity**: 0.6/1.0 (Moderate complexity, focused integration)  
+**Key Simplifications**: 
+- Single Firebase project (eliminated dual-system complexity)
+- Love Retold handles transcription (eliminated OpenAI integration)
+- Love Retold handles email/prompt management (eliminated automation layer)
 
-#### 🛡️ Task 4.1.1: Production Security Rules
-- **Owner**: Backend Engineer
-- **Dependencies**: Wave 3 complete
-- **Acceptance Criteria**:
-  - [ ] Comprehensive Firestore security rules for all collections
-  - [ ] Storage security rules preventing unauthorized access
-  - [ ] Input validation on all Cloud Functions
-  - [ ] Rate limiting to prevent abuse
-  - [ ] CORS configuration for cross-origin requests
-- **Definition of Done**: Security audit passes all tests
-
-#### 🔐 Task 4.1.2: Data Privacy & GDPR Compliance
-- **Owner**: Backend Engineer + Legal Review
-- **Dependencies**: Task 4.1.1 complete
-- **Acceptance Criteria**:
-  - [ ] User data deletion functionality
-  - [ ] Data export functionality for user requests
-  - [ ] Privacy policy updates for recording features
-  - [ ] Consent management for data processing
-  - [ ] Audit trail for data access and modifications
-- **Definition of Done**: GDPR compliance verified by legal review
-
-#### 🔍 Task 4.1.3: Security Testing & Penetration Testing
-- **Owner**: QA Engineer + Security Consultant
-- **Dependencies**: Task 4.1.2 complete
-- **Acceptance Criteria**:
-  - [ ] Automated security scanning with tools like OWASP ZAP
-  - [ ] Manual penetration testing of all endpoints
-  - [ ] Session hijacking and CSRF protection testing
-  - [ ] File upload security validation
-  - [ ] API rate limiting and abuse prevention testing
-- **Definition of Done**: No critical or high-severity security issues
-
-### 📋 Epic 4.2: Performance Optimization
-**Priority**: HIGH | **Effort**: 12 points | **Risk**: MEDIUM
-
-#### ⚡ Task 4.2.1: Frontend Performance Optimization
-- **Owner**: Frontend Engineer
-- **Dependencies**: Wave 3 complete
-- **Acceptance Criteria**:
-  - [ ] Code splitting and lazy loading for large components
-  - [ ] Image optimization and responsive image loading
-  - [ ] Bundle size optimization and tree shaking
-  - [ ] Caching strategies for static assets
-  - [ ] Progressive Web App (PWA) implementation
-- **Definition of Done**: Lighthouse score >90 for performance
-
-#### 🚀 Task 4.2.2: Backend Performance Optimization
-- **Owner**: Backend Engineer
-- **Dependencies**: Task 4.2.1 parallel
-- **Acceptance Criteria**:
-  - [ ] Cloud Function cold start optimization
-  - [ ] Database query optimization with proper indexing
-  - [ ] File upload optimization with resumable uploads
-  - [ ] CDN configuration for media file delivery
-  - [ ] Caching strategy for frequently accessed data
-- **Definition of Done**: API response times <200ms for 95th percentile
-
-#### 📊 Task 4.2.3: Load Testing & Scalability
-- **Owner**: DevOps Engineer
-- **Dependencies**: Task 4.2.2 complete
-- **Acceptance Criteria**:
-  - [ ] Load testing with realistic user scenarios
-  - [ ] Database performance under concurrent load
-  - [ ] File upload performance with multiple users
-  - [ ] Auto-scaling configuration for Cloud Functions
-  - [ ] Performance monitoring and alerting setup
-- **Definition of Done**: System handles 100 concurrent users without degradation
-
-### 📋 Epic 4.3: Monitoring & Observability
-**Priority**: HIGH | **Effort**: 8 points | **Risk**: LOW
-
-#### 📈 Task 4.3.1: Application Monitoring Setup
-- **Owner**: DevOps Engineer
-- **Dependencies**: Wave 3 complete
-- **Acceptance Criteria**:
-  - [ ] Firebase Analytics configured for user behavior tracking
-  - [ ] Error tracking with Sentry or similar service
-  - [ ] Performance monitoring for Core Web Vitals
-  - [ ] Uptime monitoring for all critical endpoints
-  - [ ] Custom metrics for business KPIs
-- **Definition of Done**: Comprehensive monitoring dashboard operational
-
-#### 🚨 Task 4.3.2: Alerting & Incident Response
-- **Owner**: DevOps Engineer
-- **Dependencies**: Task 4.3.1 complete
-- **Acceptance Criteria**:
-  - [ ] Alert thresholds configured for error rates and performance
-  - [ ] Incident response playbooks documented
-  - [ ] On-call rotation and escalation procedures
-  - [ ] Health checks for all critical services
-  - [ ] Automated recovery procedures where possible
-- **Definition of Done**: 24/7 monitoring with appropriate alert coverage
-
-#### 📊 Task 4.3.3: Analytics & Business Intelligence
-- **Owner**: Data Analyst + Product Manager
-- **Dependencies**: Task 4.3.1 complete
-- **Acceptance Criteria**:
-  - [ ] User journey tracking and funnel analysis
-  - [ ] Recording completion rate monitoring
-  - [ ] Email engagement metrics tracking
-  - [ ] Story playback and engagement analytics
-  - [ ] Business dashboard for key metrics
-- **Definition of Done**: Product metrics dashboard available to stakeholders
-
-### 📋 Epic 4.4: Launch Preparation
-**Priority**: CRITICAL | **Effort**: 9 points | **Risk**: LOW
-
-#### 📚 Task 4.4.1: Documentation & Training Materials
-- **Owner**: Technical Writer + Product Manager
-- **Dependencies**: All previous epics 90% complete
-- **Acceptance Criteria**:
-  - [ ] User onboarding guide and tutorials
-  - [ ] Technical documentation for development team
-  - [ ] API documentation for integration points
-  - [ ] Troubleshooting guide for support team
-  - [ ] Release notes and feature announcements
-- **Definition of Done**: Complete documentation published and reviewed
-
-#### 🧪 Task 4.4.2: Comprehensive End-to-End Testing
-- **Owner**: QA Team
-- **Dependencies**: All Wave 4 development 95% complete
-- **Acceptance Criteria**:
-  - [ ] Automated E2E test suite covering all user journeys
-  - [ ] Cross-browser testing on all supported platforms
-  - [ ] Mobile testing on iOS and Android devices
-  - [ ] Performance testing under realistic conditions
-  - [ ] Accessibility testing for WCAG compliance
-- **Definition of Done**: All tests pass with >95% reliability
-
-#### 🚀 Task 4.4.3: Deployment & Launch Strategy
-- **Owner**: DevOps Engineer + Product Manager
-- **Dependencies**: Task 4.4.2 complete
-- **Acceptance Criteria**:
-  - [ ] Production deployment pipeline configured
-  - [ ] Blue-green deployment strategy for zero-downtime updates
-  - [ ] Rollback procedures tested and documented
-  - [ ] Launch plan with feature flags for gradual rollout
-  - [ ] Go-live checklist completed
-- **Definition of Done**: Production system deployed and validated
-
-### Wave 4 Validation Checklist
-- [ ] **Security Validation**: All security requirements met and tested
-- [ ] **Performance Validation**: System meets all performance benchmarks
-- [ ] **Monitoring Validation**: Complete observability and alerting operational
-- [ ] **Documentation Validation**: All documentation complete and accurate
-- [ ] **Launch Validation**: System ready for production traffic
-- [ ] **Compliance Validation**: All legal and regulatory requirements met
-
-**Wave 4 Success Metrics**:
-- Security scan: 0 critical/high issues
-- Performance: Lighthouse score >90
-- Uptime: >99.9% availability
-- Documentation: 100% coverage of user-facing features
-
----
-
-## 🎯 Cross-Wave Considerations
-
-### Parallel Execution Opportunities
-- **Wave 1**: Firebase setup can run parallel with React project creation
-- **Wave 2**: OpenAI integration can develop parallel with video recording
-- **Wave 3**: Email templates can design parallel with Love Retold integration
-- **Wave 4**: Documentation can start in Wave 3, security testing parallel with performance optimization
-
-### Risk Mitigation Strategies
-1. **Technical Risk**: Early prototyping of highest-risk components (media recording, OpenAI)
-2. **Integration Risk**: Frequent integration testing between waves
-3. **Performance Risk**: Load testing starts in Wave 3, optimization in Wave 4
-4. **Security Risk**: Security review throughout, formal audit in Wave 4
-5. **User Experience Risk**: User testing after each wave completion
-
-### Quality Gates Between Waves
-- **Wave 1 → 2**: Basic recording and upload must be 100% functional
-- **Wave 2 → 3**: Full recording pipeline with transcription must be stable  
-- **Wave 3 → 4**: Complete user journey must work end-to-end
-- **Wave 4 → Launch**: All production requirements must be met
-
-### Success Metrics Tracking
-- **Development Velocity**: Story points completed per wave
-- **Quality Metrics**: Bug escape rate, test coverage, performance benchmarks
-- **User Metrics**: Task completion rates, error rates, user satisfaction
-- **Business Metrics**: Feature adoption, engagement rates, conversion funnel
-
----
-
-## 📊 Resource Allocation & Team Structure
-
-### Recommended Team Composition
-- **Technical Lead/Architect**: 1 FTE (oversight, technical decisions)
-- **Backend Engineers**: 2 FTE (Firebase, Cloud Functions, integrations)
-- **Frontend Engineers**: 2 FTE (Recording app, Love Retold updates)
-- **DevOps Engineer**: 0.5 FTE (deployment, monitoring, security)
-- **QA Engineer**: 1 FTE (testing, validation, quality assurance)
-- **Product Manager**: 0.5 FTE (requirements, user acceptance, launch)
-
-### Skill Requirements
-- **Firebase Expertise**: Critical for backend development
-- **React Proficiency**: Required for both frontend applications
-- **Mobile Development**: iOS/Android recording experience preferred
-- **Security Knowledge**: For production hardening and compliance
-- **DevOps Skills**: CI/CD, monitoring, cloud infrastructure
-
-### External Dependencies
-- **OpenAI API Access**: Required for transcription functionality
-- **Email Service**: SendGrid or similar for notification delivery
-- **Domain/SSL**: For production deployment
-- **Legal Review**: For privacy policy and compliance validation
-
----
-
-## 🚀 Launch Strategy & Post-Launch
-
-### Gradual Rollout Plan
-1. **Internal Beta** (Wave 4 completion): Team and stakeholder testing
-2. **Limited Beta** (Week 5): 50 trusted users for feedback
-3. **Soft Launch** (Week 6): 500 users with monitoring and optimization
-4. **Full Launch** (Week 7): General availability with marketing support
-
-### Post-Launch Priorities
-1. **User Feedback Integration**: Rapid iteration based on real usage
-2. **Performance Optimization**: Fine-tuning based on production metrics
-3. **Feature Enhancement**: Additional features based on user requests
-4. **Scale Planning**: Infrastructure scaling for growth
-
-### Success Measurement
-- **Technical Success**: <2% error rate, >99.9% uptime, <3s load times
-- **User Success**: >70% recording completion, >4/5 user satisfaction
-- **Business Success**: Increased engagement, user retention, feature adoption
+### Final Deliverable
+**Production-ready recording interface** deployed at record.loveretold.com that:
+- Integrates seamlessly with Love Retold's existing platform  
+- Provides reliable cross-browser recording (98% compatibility)
+- Handles session management and status progression
+- Uploads recordings to Love Retold's Firebase for automatic transcription
+- Matches Love Retold's professional quality standards
 
 ---
 
 ## 📋 Implementation Notes
 
-### Development Methodology
-- **Agile/Scrum**: 5-day sprints aligned with wave boundaries
-- **Daily Standups**: Progress tracking and blocker resolution
-- **Sprint Reviews**: Stakeholder feedback and validation
-- **Retrospectives**: Process improvement between waves
+### Key Changes from Original Plan
+1. **Unified Firebase**: Eliminated dual-project complexity by using Love Retold's Firebase
+2. **Simplified Integration**: Love Retold handles transcription, email, and user management
+3. **Focused Scope**: Recording app focuses solely on capture and upload functionality
+4. **Faster Timeline**: 15 days instead of 20 days due to reduced complexity
 
-### Quality Assurance
-- **Test-Driven Development**: Write tests before implementation
-- **Continuous Integration**: Automated testing on all commits
-- **Code Review**: All code reviewed before merge
-- **User Acceptance Testing**: Product manager validation for each feature
+### Technical Benefits
+- **Simpler Architecture**: Single Firebase project reduces integration complexity
+- **Better Performance**: Direct integration eliminates data transfer overhead  
+- **Easier Maintenance**: Unified system with fewer moving parts
+- **Faster Development**: Less custom backend infrastructure to build
 
-### Documentation Strategy
-- **Living Documentation**: Update docs with code changes
-- **Architecture Decision Records**: Document major technical decisions
-- **Runbooks**: Operational procedures for production issues
-- **User Guides**: Help documentation for end users
+### Love Retold Partnership Benefits  
+- **Seamless UX**: Recording feels like part of Love Retold platform
+- **Unified Branding**: Consistent brand experience across all touchpoints
+- **Single Support Point**: Love Retold team manages entire user journey
+- **Simplified Operations**: One Firebase project to monitor and maintain
 
 ---
 
-This vertical slice backlog provides a systematic, wave-based approach to implementing the Love Retold Recording Integration. Each wave delivers complete user value while progressively building toward the full enterprise solution. The systematic strategy ensures risk mitigation, quality gates, and parallel execution opportunities while maintaining clear validation criteria and rollback capabilities.
+This streamlined approach delivers the same user value with significantly reduced complexity, faster timeline, and better integration with Love Retold's existing platform architecture.
