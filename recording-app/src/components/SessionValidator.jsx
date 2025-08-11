@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { validateSession, getSessionStatusMessage, canRecord } from '../services/session.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
 import StatusMessage from './StatusMessage.jsx';
-import RecordingInterface from './RecordingInterface.jsx';
+import EnhancedRecordingInterface from './EnhancedRecordingInterface.jsx';
 
 const SessionValidator = () => {
   const { sessionId } = useParams();
@@ -21,15 +21,20 @@ const SessionValidator = () => {
 
       try {
         setLoading(true);
+        // validateSession now handles all error cases and timeouts internally
         const data = await validateSession(sessionId);
+        
         setSessionData(data);
         
+        // Check if the validation returned an error status
         if (data.status === 'error') {
           setError(data.message);
         }
       } catch (error) {
-        console.error('Error loading session:', error);
-        setError('Failed to load recording session. Please check your connection and try again.');
+        console.error('Unexpected error in session validation:', error);
+        // This should not happen since validateSession always returns an object,
+        // but handle it just in case
+        setError('Unable to validate session. Please check your connection and try again.');
       } finally {
         setLoading(false);
       }
@@ -88,7 +93,7 @@ const SessionValidator = () => {
   if (canRecord(sessionData.status)) {
     return (
       <div className="session-validator">
-        <RecordingInterface 
+        <EnhancedRecordingInterface 
           sessionData={sessionData}
           sessionId={sessionId}
         />

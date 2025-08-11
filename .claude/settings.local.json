@@ -30,7 +30,14 @@
       "Bash(firebase:*)",
       "Bash(mv:*)",
       "Bash(node:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npx playwright install:*)",
+      "Bash(timeout 5 firebase functions:log --only validateSession)",
+      "mcp__context7__get-library-docs",
+      "mcp__context7__resolve-library-id",
+      "Bash(npx playwright test:*)",
+      "Bash(curl:*)",
+      "Bash(npm test:*)"
     ],
     "deny": []
   }

@@ -31,14 +31,14 @@ const StatusMessage = ({ status, message, title = null, actionButton = null }) =
   };
 
   return (
-    <div className={`status-message ${getStatusClass(status)}`}>
+    <div className={`status-message ${getStatusClass(status)}`} data-testid="error-message">
       <div className="status-icon">
         {getStatusIcon(status)}
       </div>
       
       <div className="status-content">
         {title && <h2 className="status-title">{title}</h2>}
-        <p className="status-text">{message}</p>
+        <p className="status-text" data-testid="error-text">{message}</p>
         
         {actionButton && (
           <div className="status-actions">
