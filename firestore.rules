@@ -18,6 +18,12 @@ service cloud.firestore {
              get(/databases/$(database)/documents/recordingSessions/$(sessionId)).data.expiresAt > request.time;
     }
     
+    // Helper function for Love Retold anonymous updates
+    function onlyUpdatingFields(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(fields);
+    }
+    
     // Users collection - strict user isolation
     match /users/{userId} {
       allow read, write: if isOwner(userId);
@@ -32,18 +38,24 @@ service cloud.firestore {
                    request.resource.data.userId == request.auth.uid;
     }
     
-    // Recording sessions - special handling for anonymous access
+    // Recording sessions - Love Retold anonymous access pattern
     match /recordingSessions/{sessionId} {
-      // Read access for session owner or valid anonymous session
-      allow read: if isAuthenticated() && 
-                 (resource.data.userId == request.auth.uid ||
-                  isValidAnonymousSession(sessionId));
+      // Anonymous read access (anyone with link can read)
+      allow read: if true;
       
-      // Write access only for session owner
-      allow write: if isAuthenticated() && 
-                  resource.data.userId == request.auth.uid;
+      // Anonymous limited writes (status/progress updates only)
+      allow update: if request.auth == null &&
+        onlyUpdatingFields([
+          'status', 'recordingData', 'storagePaths', 
+          'recordingStartedAt', 'recordingCompletedAt', 'error'
+        ]) &&
+        resource.data.status in ['pending', 'active', 'recording', 'uploading', 'failed'];
       
-      // Create access for authenticated users
+      // Authenticated access for session owner (main app)
+      allow read, write: if isAuthenticated() && 
+                          resource.data.userId == request.auth.uid;
+      
+      // Create access for authenticated users only (main app)
       allow create: if isAuthenticated() && 
                    request.resource.data.userId == request.auth.uid;
     }

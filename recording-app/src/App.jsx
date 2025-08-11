@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import SessionValidator from './components/SessionValidator.jsx';
+import SessionRouter from './components/SessionRouter.jsx';
 import StoryDisplay from './components/StoryDisplay.jsx';
 import StatusMessage from './components/StatusMessage.jsx';
 import './styles/main.css';
@@ -37,10 +38,16 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
-          {/* Main recording route */}
+          {/* Love Retold primary route - path parameter based */}
           <Route 
             path="/record/:sessionId" 
             element={<SessionValidator />} 
+          />
+          
+          {/* Legacy query parameter route - backward compatibility */}
+          <Route 
+            path="/" 
+            element={<SessionRouter />} 
           />
           
           {/* Story viewing route */}
@@ -49,9 +56,9 @@ function App() {
             element={<StoryDisplayPage />} 
           />
           
-          {/* Home route - redirect to info page */}
+          {/* Info page route */}
           <Route 
-            path="/" 
+            path="/info" 
             element={
               <div className="app-container">
                 <div className="app-header">

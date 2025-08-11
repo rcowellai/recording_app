@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { validateSession, getSessionStatusMessage, canRecord } from '../services/session.js';
+import { parseSessionId, validateSessionId } from '../utils/sessionParser.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
 import StatusMessage from './StatusMessage.jsx';
 import EnhancedRecordingInterface from './EnhancedRecordingInterface.jsx';
 
-const SessionValidator = () => {
-  const { sessionId } = useParams();
+const SessionValidator = ({ sessionId: propSessionId, sessionComponents: propSessionComponents }) => {
+  const { sessionId: paramSessionId } = useParams();
+  const sessionId = propSessionId || paramSessionId; // Support both prop and URL parameter
   const [sessionData, setSessionData] = useState(null);
+  const [sessionComponents, setSessionComponents] = useState(propSessionComponents);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -21,6 +24,30 @@ const SessionValidator = () => {
 
       try {
         setLoading(true);
+
+        // Parse session components if not provided (from URL parameter)
+        if (!propSessionComponents && sessionId) {
+          try {
+            if (!validateSessionId(sessionId)) {
+              setError('Invalid recording link format. This recording link appears to be corrupted or expired.');
+              setLoading(false);
+              return;
+            }
+            const parsedComponents = parseSessionId(sessionId);
+            setSessionComponents(parsedComponents);
+            console.log('🔍 Session components parsed from URL:', {
+              userId: parsedComponents.userId,
+              promptId: parsedComponents.promptId,
+              storytellerId: parsedComponents.storytellerId
+            });
+          } catch (parseError) {
+            console.error('❌ Session parsing failed:', parseError);
+            setError('Unable to process recording link. Please contact the sender for a new link.');
+            setLoading(false);
+            return;
+          }
+        }
+        
         // validateSession now handles all error cases and timeouts internally
         const data = await validateSession(sessionId);
         
@@ -41,7 +68,7 @@ const SessionValidator = () => {
     };
 
     loadSession();
-  }, [sessionId]);
+  }, [sessionId, propSessionComponents]);
 
   // Loading state
   if (loading) {
@@ -96,6 +123,7 @@ const SessionValidator = () => {
         <EnhancedRecordingInterface 
           sessionData={sessionData}
           sessionId={sessionId}
+          sessionComponents={sessionComponents}
         />
       </div>
     );

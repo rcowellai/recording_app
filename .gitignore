@@ -6,7 +6,16 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Environment variables
+# Environment variables (recording-app specific)
+recording-app/.env.local
+recording-app/.env.development.local
+recording-app/.env.test.local
+recording-app/.env.production.local
+
+# Keep these environment files in git for Love Retold configuration
+# recording-app/.env.production (committed for production config)
+
+# Legacy environment files (no longer used)
 .env
 .env.local
 .env.development.local

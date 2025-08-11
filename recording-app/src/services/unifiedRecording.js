@@ -1,5 +1,7 @@
 import { ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
-import { storage, initializeAnonymousAuth } from './firebase.js';
+import { doc, updateDoc } from 'firebase/firestore';
+import { storage, db, initializeAnonymousAuth } from './firebase.js';
+import { generateStoragePaths } from '../utils/sessionParser.js';
 
 /**
  * Unified Recording Service - Epic 2.1
@@ -316,13 +318,14 @@ export class ChunkedRecorder {
 }
 
 /**
- * Enhanced chunked upload with retry logic
- * @param {string} sessionId - Session ID
+ * Love Retold chunked upload with proper storage paths and session updates
+ * @param {string} sessionId - Love Retold session ID
+ * @param {Object} sessionComponents - Parsed session components from parseSessionId
  * @param {Array} chunks - Array of recording chunks
  * @param {Object} options - Upload options
  * @returns {Promise<string>} Upload result
  */
-export const uploadChunkedRecording = async (sessionId, chunks, options = {}) => {
+export const uploadChunkedRecording = async (sessionId, sessionComponents, chunks, options = {}) => {
   try {
     await initializeAnonymousAuth();
     
@@ -333,11 +336,143 @@ export const uploadChunkedRecording = async (sessionId, chunks, options = {}) =>
       maxRetries = 3
     } = options;
 
+    // Generate Love Retold storage paths
+    const storagePaths = generateStoragePaths(sessionComponents, sessionId);
+    const fileExtension = getBestSupportedMimeType(mediaType).includes('webm') ? 'webm' : 'mp4';
+    const finalPath = storagePaths.finalPath(fileExtension);
+    
+    console.log('📁 Love Retold storage path:', finalPath);
+    
+    // Combine all chunks into final blob
+    const allChunksData = chunks.map(chunk => chunk.data);
+    const finalBlob = new Blob(allChunksData, { 
+      type: getBestSupportedMimeType(mediaType)
+    });
+    
+    const storageRef = ref(storage, finalPath);
+    
+    const metadata = {
+      contentType: getBestSupportedMimeType(mediaType),
+      customMetadata: {
+        sessionId: sessionId,
+        userId: sessionComponents.userId,
+        promptId: sessionComponents.promptId,
+        storytellerId: sessionComponents.storytellerId,
+        recordingType: mediaType,
+        timestamp: Date.now().toString(),
+        chunkCount: chunks.length.toString(),
+        recordingVersion: '2.1-love-retold'
+      }
+    };
+
+    // Update session status to uploading
+    try {
+      await updateDoc(doc(db, 'recordingSessions', sessionId), {
+        status: 'uploading',
+        'recordingData.fileSize': finalBlob.size,
+        'recordingData.mimeType': finalBlob.type,
+        'recordingData.chunksCount': chunks.length
+      });
+      console.log('📊 Session status updated to uploading');
+    } catch (updateError) {
+      console.warn('⚠️ Failed to update session status:', updateError);
+      // Continue with upload even if status update fails
+    }
+
+    // Upload with retry logic
+    let lastError = null;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const uploadTask = uploadBytesResumable(storageRef, finalBlob, metadata);
+        
+        const result = await new Promise((resolve, reject) => {
+          uploadTask.on('state_changed',
+            (snapshot) => {
+              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              onProgress(Math.round(progress));
+              
+              // Update session progress
+              if (progress % 10 === 0) { // Update every 10%
+                updateDoc(doc(db, 'recordingSessions', sessionId), {
+                  'recordingData.uploadProgress': Math.round(progress)
+                }).catch(err => console.warn('Progress update failed:', err));
+              }
+            },
+            (error) => {
+              console.error(`Upload attempt ${attempt + 1} failed:`, error);
+              reject(error);
+            },
+            () => {
+              console.log('✅ Love Retold upload completed successfully');
+              resolve(finalPath);
+            }
+          );
+        });
+
+        // Update session with final storage path
+        await updateDoc(doc(db, 'recordingSessions', sessionId), {
+          status: 'processing',
+          'storagePaths.finalVideo': finalPath,
+          'recordingData.uploadProgress': 100,
+          recordingCompletedAt: new Date()
+        });
+
+        console.log('📊 Session updated with final storage path');
+        return result;
+
+      } catch (error) {
+        lastError = error;
+        if (attempt < maxRetries - 1) {
+          console.log(`Upload attempt ${attempt + 1} failed, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // Exponential backoff
+        }
+      }
+    }
+    
+    // Mark session as failed if all attempts fail
+    try {
+      await updateDoc(doc(db, 'recordingSessions', sessionId), {
+        status: 'failed',
+        error: {
+          code: 'UPLOAD_FAILED',
+          message: lastError.message,
+          timestamp: new Date(),
+          retryable: true,
+          retryCount: maxRetries
+        }
+      });
+    } catch (updateError) {
+      console.warn('Failed to update session error status:', updateError);
+    }
+    
+    throw new Error(`Upload failed after ${maxRetries} attempts: ${lastError.message}`);
+    
+  } catch (error) {
+    console.error('Error in Love Retold chunked upload:', error);
+    throw new Error('Failed to upload recording. Please check your connection and try again.');
+  }
+};
+
+/**
+ * Legacy upload function for backward compatibility
+ * @deprecated Use uploadChunkedRecording with sessionComponents instead
+ */
+export const uploadChunkedRecordingLegacy = async (sessionId, chunks, options = {}) => {
+  console.warn('⚠️ Using legacy upload function. Consider upgrading to Love Retold format.');
+  
+  try {
+    await initializeAnonymousAuth();
+    
+    const {
+      mediaType = 'audio',
+      onProgress = () => {},
+      maxRetries = 3
+    } = options;
+
     const timestamp = Date.now();
     const fileExtension = mediaType === 'video' ? 'mp4' : 'm4a';
     const baseFilename = `${sessionId}_${timestamp}`;
     
-    // Combine all chunks into final blob
     const allChunksData = chunks.map(chunk => chunk.data);
     const finalBlob = new Blob(allChunksData, { 
       type: getBestSupportedMimeType(mediaType)
@@ -355,45 +490,28 @@ export const uploadChunkedRecording = async (sessionId, chunks, options = {}) =>
         timestamp: timestamp.toString(),
         originalFilename: filename,
         chunkCount: chunks.length.toString(),
-        recordingVersion: '2.1' // Epic 2.1 version
+        recordingVersion: '2.1-legacy'
       }
     };
 
-    // Upload with retry logic
-    let lastError = null;
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      try {
-        const uploadTask = uploadBytesResumable(storageRef, finalBlob, metadata);
-        
-        return await new Promise((resolve, reject) => {
-          uploadTask.on('state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-              onProgress(Math.round(progress));
-            },
-            (error) => {
-              console.error(`Upload attempt ${attempt + 1} failed:`, error);
-              reject(error);
-            },
-            () => {
-              console.log('Chunked upload completed successfully');
-              resolve(filePath);
-            }
-          );
-        });
-      } catch (error) {
-        lastError = error;
-        if (attempt < maxRetries - 1) {
-          console.log(`Upload attempt ${attempt + 1} failed, retrying...`);
-          await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1))); // Exponential backoff
-        }
-      }
-    }
+    const uploadTask = uploadBytesResumable(storageRef, finalBlob, metadata);
     
-    throw new Error(`Upload failed after ${maxRetries} attempts: ${lastError.message}`);
+    return await new Promise((resolve, reject) => {
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress(Math.round(progress));
+        },
+        reject,
+        () => {
+          console.log('Legacy upload completed successfully');
+          resolve(filePath);
+        }
+      );
+    });
     
   } catch (error) {
-    console.error('Error in chunked upload:', error);
+    console.error('Error in legacy upload:', error);
     throw new Error('Failed to upload recording. Please check your connection and try again.');
   }
 };

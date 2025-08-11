@@ -1,29 +1,13 @@
 {
   "projects": {
-    "default": "love-retold-backend",
-    "development": "love-retold-backend-dev",
-    "staging": "love-retold-backend-staging",
-    "production": "love-retold-backend"
+    "default": "love-retold-webapp",
+    "production": "love-retold-webapp"
   },
   "targets": {
-    "love-retold-backend": {
+    "love-retold-webapp": {
       "hosting": {
         "recording-app": [
-          "love-retold-backend"
-        ]
-      }
-    },
-    "love-retold-backend-staging": {
-      "hosting": {
-        "recording-app": [
-          "love-retold-backend-staging"
-        ]
-      }
-    },
-    "love-retold-backend-dev": {
-      "hosting": {
-        "recording-app": [
-          "love-retold-backend-dev"
+          "love-retold-webapp"
         ]
       }
     }

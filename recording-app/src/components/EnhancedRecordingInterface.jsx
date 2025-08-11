@@ -12,7 +12,7 @@ import LoadingSpinner from './LoadingSpinner.jsx';
 import StatusMessage from './StatusMessage.jsx';
 import { runCodecCompatibilityTest } from '../utils/codecTest.js';
 
-const EnhancedRecordingInterface = ({ sessionData, sessionId }) => {
+const EnhancedRecordingInterface = ({ sessionData, sessionId, sessionComponents }) => {
   // Recording states
   const [recordingMode, setRecordingMode] = useState(null); // null, 'audio', 'video'
   const [isRecording, setIsRecording] = useState(false);
@@ -374,12 +374,26 @@ const EnhancedRecordingInterface = ({ sessionData, sessionId }) => {
       setUploadProgress(0);
       setError(null);
 
-      await uploadChunkedRecording(sessionId, recordedChunks, {
-        mediaType: recordingMode,
-        onProgress: (progress) => {
-          setUploadProgress(progress);
-        }
-      });
+      if (sessionComponents) {
+        // Love Retold upload with proper storage paths
+        console.log('🚀 Starting Love Retold upload...');
+        await uploadChunkedRecording(sessionId, sessionComponents, recordedChunks, {
+          mediaType: recordingMode,
+          onProgress: (progress) => {
+            setUploadProgress(progress);
+          }
+        });
+      } else {
+        // Legacy upload for backward compatibility
+        console.log('⚠️ Using legacy upload (no sessionComponents provided)');
+        const { uploadChunkedRecordingLegacy } = await import('../services/unifiedRecording.js');
+        await uploadChunkedRecordingLegacy(sessionId, recordedChunks, {
+          mediaType: recordingMode,
+          onProgress: (progress) => {
+            setUploadProgress(progress);
+          }
+        });
+      }
 
       setIsCompleted(true);
     } catch (error) {

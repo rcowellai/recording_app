@@ -11,30 +11,27 @@
     "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"],
     "runtime": "nodejs18"
   },
-  "hosting": [
-    {
-      "target": "recording-app",
-      "public": "recording-app/dist",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "/record/**",
-          "destination": "/index.html"
-        }
-      ],
-      "headers": [
-        {
-          "source": "**/*.@(js|css)",
-          "headers": [
-            {
-              "key": "Cache-Control",
-              "value": "max-age=31536000"
-            }
-          ]
-        }
-      ]
-    }
-  ],
+  "hosting": {
+    "public": "recording-app/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=31536000"
+          }
+        ]
+      }
+    ]
+  },
   "emulators": {
     "auth": {
       "port": 9099
