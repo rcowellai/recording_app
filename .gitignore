@@ -121,6 +121,8 @@ recording-app/*.local
 *.p12
 serviceAccountKey.json
 service-account-*.json
+*firebase-adminsdk*.json
+love-retold-webapp-firebase-adminsdk*.json
 
 # User-specific files
 *.suo

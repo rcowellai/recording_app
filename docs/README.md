@@ -205,6 +205,23 @@ npm run deploy:functions
 npm run deploy:rules
 ```
 
+### **Debugging Sessions & Database Access**
+```bash
+# Diagnose session issues directly (requires service account key)
+node scripts/diagnose-session.js check <sessionId>
+node scripts/diagnose-session.js list
+
+# Example: Check why a session isn't loading
+node scripts/diagnose-session.js check jioj9mf-custom17-myCtZuIW-myCtZuIW-1754920889
+
+# Setup: Download service account key from Firebase Console → Service Accounts
+# Save as: love-retold-webapp-firebase-adminsdk.json (already in .gitignore)
+```
+
+**Session Status Values**: `active`, `pending` (both allow recording), `completed`, `expired`, `removed`, `error`
+**URL Formats**: Both `/record/{sessionId}` and `/{sessionId}` work
+**Cloud Function**: `validateRecordingSession` (not validateSession)
+
 ---
 
 ## 📈 Monitoring & Observability

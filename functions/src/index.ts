@@ -29,6 +29,9 @@ export {
   createStory,
 };
 
+// Alias for backward compatibility with client expectation
+export { validateSession as validateRecordingSession };
+
 // Export storage triggered functions
 export {
   processRecording,

@@ -1,7 +1,7 @@
 import { httpsCallable } from 'firebase/functions';
 import { functions } from './firebase.js';
 
-const validateSessionFunction = httpsCallable(functions, 'validateSession');
+const validateSessionFunction = httpsCallable(functions, 'validateRecordingSession');
 
 /**
  * Validate a recording session
@@ -88,6 +88,7 @@ export const validateSession = async (sessionId) => {
 export const getSessionStatusMessage = (status, customMessage = '') => {
   const messages = {
     active: 'Ready to record your memory',
+    pending: 'Ready to record your memory', // Treat pending as active
     completed: 'This memory has already been recorded',
     expired: 'This recording link has expired (links are valid for 7 days)',
     removed: 'This question has been removed by the account owner',
@@ -103,5 +104,5 @@ export const getSessionStatusMessage = (status, customMessage = '') => {
  * @returns {boolean} Whether recording is allowed
  */
 export const canRecord = (status) => {
-  return status === 'active';
+  return status === 'active' || status === 'pending';
 };

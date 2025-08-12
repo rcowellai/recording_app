@@ -495,6 +495,12 @@ npx playwright test
 **Status**: ✅ **COMPLETE** - Epic 2.1 successfully delivered unified recording architecture
 **Architecture**: ✅ MP4-first codec strategy, memory management, background pause detection
 
+### 🚀 Epic 2.1 Deployment Complete (January 11, 2025)
+**Deployment URL**: https://record-loveretold-app.web.app
+**Session Format**: Both `/record/{sessionId}` and `/{sessionId}` paths supported
+**Cloud Functions**: `validateRecordingSession` updated to accept `pending` status
+**Integration**: ✅ Recording app successfully loads Love Retold sessions
+
 ### ✅ Sprint Goals - EPIC 2.1 DELIVERED
 - [x] **Unified Codec Implementation**: ✅ MP4-first strategy, 98% browser compatibility achieved
 - [x] **Enhanced UX & Device Handling**: ✅ Audio/video modes, just-in-time permissions
@@ -507,39 +513,39 @@ npx playwright test
 **Priority**: CRITICAL | **Effort**: 10 points | **Risk**: MEDIUM  
 **Status**: ✅ **DELIVERED** - All tasks completed with enhanced functionality
 
-#### 🔧 Task 2.1.1: Firebase Configuration Migration - LOVE RETOLD SPEC
+#### 🔧 Task 2.1.1: Firebase Configuration Migration - ✅ COMPLETE
 - **Owner**: Backend Engineer
 - **Dependencies**: Wave 1 complete + Love Retold Firebase access
 - **Love Retold Requirements**:
-  - **Firebase Project**: `love-retold-production`
-  - **Session Collection**: `/recordingSessions/{sessionId}`
-  - **Storage Structure**: `/users/{userId}/recordings/{sessionId}/`
-  - **Security Rules**: Anonymous upload permissions (Love Retold provides)
+  - **Firebase Project**: `love-retold-webapp` ✅
+  - **Session Collection**: `/recordingSessions/{sessionId}` ✅
+  - **Storage Structure**: `/users/{userId}/recordings/{sessionId}/` ✅
+  - **Security Rules**: Anonymous upload permissions (Love Retold provides) ✅
 - **Acceptance Criteria**:
-  - [ ] Replace current Firebase config with Love Retold's project
-  - [ ] Test Firestore read access to recordingSessions collection
-  - [ ] Test Storage write access to user recording paths
-  - [ ] Verify security rules allow anonymous session access
-  - [ ] Update environment variables and deployment config
-- **Definition of Done**: Recording app connected to Love Retold's Firebase project
-- **Timeline**: 1-2 days (configuration + testing)
+  - [x] Replace current Firebase config with Love Retold's project ✅
+  - [x] Test Firestore read access to recordingSessions collection ✅
+  - [x] Test Storage write access to user recording paths ✅
+  - [x] Verify security rules allow anonymous session access ✅
+  - [x] Update environment variables and deployment config ✅
+- **Definition of Done**: Recording app connected to Love Retold's Firebase project ✅
+- **Completed**: January 11, 2025
 
-#### 🔗 Task 2.1.2: SESSION_ID Management & Validation - LOVE RETOLD SPEC
+#### 🔗 Task 2.1.2: SESSION_ID Management & Validation - ✅ COMPLETE
 - **Owner**: Frontend Engineer
 - **Dependencies**: Task 2.1.1 complete
 - **Love Retold SESSION_ID Format**:
-  - **Structure**: `{randomPrefix}-{promptId}-{userId}-{storytellerId}-{timestamp}`
-  - **Example**: `x7k9m2q-prmt_abc123-usr_def456-stlr_ghi789-1704128400`
-  - **URL Format**: `https://record.loveretold.com/?session={SESSION_ID}`
+  - **Structure**: `{randomPrefix}-{promptId}-{userId}-{storytellerId}-{timestamp}` ✅
+  - **Example**: `jioj9mf-custom17-myCtZuIW-myCtZuIW-1754920889` ✅
+  - **URL Format**: `https://record-loveretold-app.web.app/{SESSION_ID}` ✅
 - **Acceptance Criteria**:
-  - [ ] Parse SESSION_ID from URL query parameter
-  - [ ] Extract promptId, userId, storytellerId from SESSION_ID
-  - [ ] Query Firestore `/recordingSessions/{sessionId}` document
-  - [ ] Validate session status (pending/recording/completed/expired/deleted)
-  - [ ] Handle session validation errors with appropriate UI messages
-  - [ ] Display session data (prompt text, couple names, storyteller name)
-- **Definition of Done**: App can load and validate any Love Retold recording link
-- **Error Handling**: SESSION_NOT_FOUND, ALREADY_RECORDED, SESSION_EXPIRED, PROMPT_DELETED
+  - [x] Parse SESSION_ID from URL path parameter ✅
+  - [x] Extract promptId, userId, storytellerId from SESSION_ID ✅
+  - [x] Query Firestore `/recordingSessions/{sessionId}` document ✅
+  - [x] Validate session status (pending/active/completed/expired/removed) ✅
+  - [x] Handle session validation errors with appropriate UI messages ✅
+  - [x] Display session data (prompt text, couple names, storyteller name) ✅
+- **Definition of Done**: App can load and validate any Love Retold recording link ✅
+- **Completed**: January 11, 2025 - Successfully validates and loads sessions
 
 #### 📤 Task 2.1.3: Love Retold Storage Integration - LOVE RETOLD SPEC
 - **Owner**: Frontend Engineer
@@ -842,8 +848,8 @@ npx playwright test
 
 ### Wave Completion Status
 **✅ Wave 1**: COMPLETE - 5/5 epics delivered (Firebase, Recording App, Functions, Story View, Testing Framework)  
-**✅ Wave 2**: COMPLETE - Epic 2.1 delivered unified recording architecture  
-**🔄 Wave 3**: READY - Love Retold integration, Safari testing, production deployment  
+**✅ Wave 2**: COMPLETE - Epic 2.1 delivered unified recording architecture + deployment  
+**🔄 Wave 3**: IN PROGRESS - Epic 3.1 Session validation complete, recording functionality next  
 
 ### Implementation Progress
 **Completed**: 75% (6/8 major epics completed successfully)  

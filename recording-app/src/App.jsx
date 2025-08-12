@@ -44,6 +44,12 @@ function App() {
             element={<SessionValidator />} 
           />
           
+          {/* Session ID at root level (Love Retold compatibility) */}
+          <Route 
+            path="/:sessionId" 
+            element={<SessionValidator />} 
+          />
+          
           {/* Legacy query parameter route - backward compatibility */}
           <Route 
             path="/" 

@@ -16,7 +16,7 @@ interface ValidateSessionRequest {
 
 interface ValidateSessionResponse {
   isValid: boolean;
-  status: 'active' | 'expired' | 'completed' | 'removed' | 'invalid';
+  status: 'active' | 'pending' | 'expired' | 'completed' | 'removed' | 'invalid';
   message: string;
   sessionData?: {
     questionText: string;
@@ -109,7 +109,8 @@ export const validateSession = functions.https.onCall<ValidateSessionRequest, Pr
         };
       }
 
-      if (sessionData.status !== 'active') {
+      // Accept both 'active' and 'pending' as valid recording states
+      if (sessionData.status !== 'active' && sessionData.status !== 'pending') {
         return {
           isValid: false,
           status: 'invalid',
@@ -117,7 +118,7 @@ export const validateSession = functions.https.onCall<ValidateSessionRequest, Pr
         };
       }
 
-      // Session is valid and active
+      // Session is valid (active or pending)
       loggerInstance.info('Session validation successful', {
         sessionId,
         status: sessionData.status,
@@ -126,7 +127,7 @@ export const validateSession = functions.https.onCall<ValidateSessionRequest, Pr
 
       return {
         isValid: true,
-        status: 'active',
+        status: sessionData.status === 'pending' ? 'pending' : 'active',
         message: 'Session is valid and ready for recording',
         sessionData: {
           questionText: sessionData.questionText,
