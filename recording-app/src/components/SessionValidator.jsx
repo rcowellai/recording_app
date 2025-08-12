@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { validateSession, getSessionStatusMessage, canRecord } from '../services/session.js';
+import { 
+  validateSession, 
+  getSessionStatusMessage, 
+  getEnhancedSessionStatus,
+  canRecord, 
+  getStatusCategory,
+  isErrorStatus
+} from '../services/session.js';
 import { parseSessionId, validateSessionId } from '../utils/sessionParser.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
 import StatusMessage from './StatusMessage.jsx';
@@ -53,8 +60,8 @@ const SessionValidator = ({ sessionId: propSessionId, sessionComponents: propSes
         
         setSessionData(data);
         
-        // Check if the validation returned an error status
-        if (data.status === 'error') {
+        // Check if the validation returned an error status using enhanced detection
+        if (isErrorStatus(data.status)) {
           setError(data.message);
         }
       } catch (error) {
@@ -82,7 +89,7 @@ const SessionValidator = ({ sessionId: propSessionId, sessionComponents: propSes
     );
   }
 
-  // Error state
+  // Error state - use enhanced status handling
   if (error) {
     return (
       <div className="session-validator">
@@ -90,27 +97,21 @@ const SessionValidator = ({ sessionId: propSessionId, sessionComponents: propSes
           status="error"
           title="Session Error"
           message={error}
-          actionButton={
-            <button 
-              onClick={() => window.location.reload()}
-              className="btn btn-primary"
-            >
-              Try Again
-            </button>
-          }
+          showDefaultActions={true}
         />
       </div>
     );
   }
 
-  // No session data
+  // No session data - treat as invalid
   if (!sessionData) {
     return (
       <div className="session-validator">
         <StatusMessage
-          status="error"
+          status="invalid"
           title="Invalid Session"
           message="No session data available"
+          showDefaultActions={true}
         />
       </div>
     );
@@ -129,29 +130,42 @@ const SessionValidator = ({ sessionId: propSessionId, sessionComponents: propSes
     );
   }
 
-  // Other session states (completed, expired, removed)
-  const statusTitles = {
-    completed: 'Memory Recorded',
-    expired: 'Link Expired',
-    removed: 'Question Removed'
+  // Other session states (completed, expired, removed, etc.)
+  // Use enhanced status system for intelligent title and action generation
+  const statusObj = getEnhancedSessionStatus(sessionData.status, sessionData.message);
+  
+  const getStatusTitle = (status, category) => {
+    const titles = {
+      // Completed states
+      completed: 'Memory Recorded',
+      
+      // Error states
+      expired: 'Link Expired',
+      removed: 'Question Removed',
+      failed: 'Recording Failed', 
+      invalid: 'Invalid Session',
+      error: 'Session Error',
+      
+      // Progress states
+      processing: 'Processing Recording',
+      recording: 'Recording in Progress',
+      uploading: 'Uploading Recording',
+      
+      // Unknown states
+      unknown: 'Session Status Unknown'
+    };
+    
+    return titles[status] || `Session ${category.charAt(0).toUpperCase() + category.slice(1)}`;
   };
 
   return (
     <div className="session-validator">
       <StatusMessage
         status={sessionData.status}
-        title={statusTitles[sessionData.status] || 'Session Status'}
-        message={getSessionStatusMessage(sessionData.status, sessionData.message)}
-        actionButton={
-          sessionData.status === 'expired' ? (
-            <button 
-              onClick={() => window.open('mailto:support@loveretold.com?subject=Expired Recording Link', '_blank')}
-              className="btn btn-secondary"
-            >
-              Contact Support
-            </button>
-          ) : null
-        }
+        title={getStatusTitle(statusObj.status, statusObj.category)}
+        message={statusObj.message}
+        customMessage={sessionData.message}
+        showDefaultActions={true}
       />
     </div>
   );
