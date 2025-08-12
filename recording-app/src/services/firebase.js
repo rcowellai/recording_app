@@ -41,18 +41,56 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 
-// Initialize anonymous authentication for recording sessions
-export const initializeAnonymousAuth = async () => {
-  try {
-    if (!auth.currentUser) {
-      await signInAnonymously(auth);
-      console.log('Anonymous authentication initialized');
+// Initialize anonymous authentication for recording sessions with retry logic
+export const initializeAnonymousAuth = async (maxRetries = 3) => {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      // Check if already authenticated with anonymous auth
+      if (auth.currentUser && auth.currentUser.isAnonymous) {
+        console.log('Anonymous authentication already active');
+        return auth.currentUser;
+      }
+      
+      // Sign out any existing user before anonymous auth
+      if (auth.currentUser && !auth.currentUser.isAnonymous) {
+        await auth.signOut();
+        console.log('Signed out existing user for anonymous auth');
+      }
+      
+      // Initialize anonymous authentication
+      const userCredential = await signInAnonymously(auth);
+      console.log(`Anonymous authentication initialized (attempt ${attempt})`);
+      
+      // Validate the authentication state
+      if (!userCredential.user || !userCredential.user.isAnonymous) {
+        throw new Error('Anonymous authentication failed - invalid auth state');
+      }
+      
+      return userCredential.user;
+    } catch (error) {
+      lastError = error;
+      console.error(`Anonymous auth attempt ${attempt} failed:`, error);
+      
+      // Don't retry on certain permanent errors
+      if (error.code === 'auth/network-request-failed' && attempt < maxRetries) {
+        console.log(`Retrying authentication in ${attempt * 1000}ms...`);
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        continue;
+      } else if (error.code && error.code.startsWith('auth/')) {
+        // Firebase auth error - provide specific message
+        throw new Error(`Authentication failed: ${error.message}`);
+      } else {
+        // Unknown error on last attempt
+        if (attempt === maxRetries) {
+          throw new Error(`Authentication failed after ${maxRetries} attempts: ${error.message}`);
+        }
+      }
     }
-    return auth.currentUser;
-  } catch (error) {
-    console.error('Error initializing anonymous auth:', error);
-    throw error;
   }
+  
+  throw new Error(`Authentication failed after ${maxRetries} attempts: ${lastError?.message || 'Unknown error'}`);
 };
 
 export default app;

@@ -40,7 +40,10 @@
       "Bash(npm test:*)",
       "Bash(git commit:*)",
       "Bash(grep:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git log:*)",
+      "Bash(cp:*)",
+      "Bash(timeout 5 firebase functions:log --only validateRecordingSession)"
     ],
     "deny": []
   }

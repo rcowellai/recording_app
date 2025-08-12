@@ -267,7 +267,7 @@ LOVE RETOLD PLATFORM PROVIDES:
 ### 2.2 Firebase Storage Structure
 
 ```
-love-retold-production.appspot.com/
+love-retold-webapp.firebasestorage.app/
 ├── users/
 │   └── {userId}/
 │       ├── profile/
@@ -1318,29 +1318,60 @@ class ErrorReporter {
 }
 ```
 
-#### 9.1.2 Environment Configuration
-```javascript
-// Production Environment Variables
-const productionConfig = {
-  VITE_FIREBASE_API_KEY: process.env.VITE_FIREBASE_API_KEY,
-  VITE_FIREBASE_AUTH_DOMAIN: "love-retold-production.firebaseapp.com",
-  VITE_FIREBASE_PROJECT_ID: "love-retold-production",
-  VITE_FIREBASE_STORAGE_BUCKET: "love-retold-production.appspot.com",
-  VITE_FIREBASE_MESSAGING_SENDER_ID: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  VITE_FIREBASE_APP_ID: process.env.VITE_FIREBASE_APP_ID,
-  
-  // Performance settings
-  VITE_MAX_RECORDING_DURATION: 900, // 15 minutes
-  VITE_CHUNK_SIZE_SECONDS: 45,      // 45-second chunks
-  VITE_MAX_UPLOAD_RETRIES: 3,       // Maximum retry attempts
-  VITE_MEMORY_CLEANUP_INTERVAL: 10000, // 10 seconds
-  
-  // Feature flags
-  VITE_ENABLE_VIDEO_RECORDING: true,
-  VITE_ENABLE_PERFORMANCE_MONITORING: true,
-  VITE_ENABLE_ERROR_REPORTING: true
-};
-```
+#### 9.1.2 Environment & Runtime Configuration
+
+**Environment File Structure:**
+- `.env.production` - Production config (committed, client-safe)
+- `.env.local` - Local development config (committed)  
+- `.env.*.local` - Environment overrides (gitignored)
+
+**Required Environment Variables:**
+
+*Firebase Configuration:*
+- `VITE_FIREBASE_API_KEY` - Firebase API key
+- `VITE_FIREBASE_AUTH_DOMAIN` - Auth domain (`love-retold-webapp.firebaseapp.com`)
+- `VITE_FIREBASE_PROJECT_ID` - Project ID (`love-retold-webapp`)
+- `VITE_FIREBASE_STORAGE_BUCKET` - Storage bucket (`love-retold-webapp.firebasestorage.app`)
+- `VITE_FIREBASE_MESSAGING_SENDER_ID` - Messaging sender ID  
+- `VITE_FIREBASE_APP_ID` - Firebase app ID
+- `VITE_FIREBASE_MEASUREMENT_ID` - Analytics measurement ID
+
+*Recording Settings:*
+- `VITE_MAX_RECORDING_TIME_MINUTES` - Maximum recording duration (15 minutes)
+- `VITE_CHUNK_DURATION_SECONDS` - Recording chunk size (45 seconds)  
+- `VITE_MAX_FILE_SIZE_MB` - Upload file size limit (500MB)
+
+*Format Support:*
+- `VITE_SUPPORTED_AUDIO_TYPES` - MP4-first audio formats
+- `VITE_SUPPORTED_VIDEO_TYPES` - MP4-first video formats
+
+*Love Retold Integration:*
+- `VITE_LOVE_RETOLD_SESSION_TIMEOUT_DAYS` - Session validity (7 days)
+- `VITE_ANONYMOUS_AUTH_ENABLED` - Anonymous authentication flag
+
+**Build & Development Commands:**
+- `npm run dev` - Local development (uses `.env.local`)
+- `npm run build` - Production build (uses `.env.production`)
+
+**Firebase Services & Emulator:**
+- Auth: Anonymous authentication (port 9099)
+- Firestore: Document database (port 8080) 
+- Storage: File storage (port 9199)
+- Functions: Cloud functions (port 5001)
+- Emulator UI: Management interface (port 4000)
+
+**Deployment Commands:**
+- `firebase emulators:start` - Start local emulator suite
+- `firebase deploy --only hosting` - Deploy recording app only
+- `firebase deploy --only functions` - Deploy cloud functions only
+- `firebase deploy --only firestore:rules,storage:rules` - Deploy security rules
+
+**Security & Validation:**
+- Environment variables validated at startup
+- Client-side configuration (safe for public repositories)
+- VITE_ prefix ensures client-side availability
+- Custom overrides via `.env.*.local` files (gitignored)
+- Anonymous auth enabled for recording sessions
 
 ### 9.2 Scalability Considerations
 

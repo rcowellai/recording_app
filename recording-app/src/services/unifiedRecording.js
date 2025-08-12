@@ -369,9 +369,11 @@ export const uploadChunkedRecording = async (sessionId, sessionComponents, chunk
     try {
       await updateDoc(doc(db, 'recordingSessions', sessionId), {
         status: 'uploading',
-        'recordingData.fileSize': finalBlob.size,
-        'recordingData.mimeType': finalBlob.type,
-        'recordingData.chunksCount': chunks.length
+        recordingData: {
+          fileSize: finalBlob.size,
+          mimeType: finalBlob.type,
+          chunksCount: chunks.length
+        }
       });
       console.log('📊 Session status updated to uploading');
     } catch (updateError) {
@@ -394,7 +396,9 @@ export const uploadChunkedRecording = async (sessionId, sessionComponents, chunk
               // Update session progress
               if (progress % 10 === 0) { // Update every 10%
                 updateDoc(doc(db, 'recordingSessions', sessionId), {
-                  'recordingData.uploadProgress': Math.round(progress)
+                  recordingData: {
+                    uploadProgress: Math.round(progress)
+                  }
                 }).catch(err => console.warn('Progress update failed:', err));
               }
             },
@@ -412,8 +416,12 @@ export const uploadChunkedRecording = async (sessionId, sessionComponents, chunk
         // Update session with final storage path
         await updateDoc(doc(db, 'recordingSessions', sessionId), {
           status: 'processing',
-          'storagePaths.finalVideo': finalPath,
-          'recordingData.uploadProgress': 100,
+          storagePaths: {
+            finalVideo: finalPath
+          },
+          recordingData: {
+            uploadProgress: 100
+          },
           recordingCompletedAt: new Date()
         });
 
@@ -448,8 +456,36 @@ export const uploadChunkedRecording = async (sessionId, sessionComponents, chunk
     throw new Error(`Upload failed after ${maxRetries} attempts: ${lastError.message}`);
     
   } catch (error) {
-    console.error('Error in Love Retold chunked upload:', error);
-    throw new Error('Failed to upload recording. Please check your connection and try again.');
+    console.error('Error in Love Retold chunked upload:', {
+      error,
+      errorCode: error?.code,
+      errorMessage: error?.message,
+      errorName: error?.name,
+      sessionId
+    });
+    
+    // Provide more specific error messages based on error type
+    if (error.code === 'storage/unauthorized') {
+      throw new Error('Authentication failed. Please refresh the page and try again.');
+    } else if (error.code === 'storage/quota-exceeded') {
+      throw new Error('Storage quota exceeded. Please try again later or contact support.');
+    } else if (error.code === 'storage/invalid-format') {
+      throw new Error('Invalid file format. Please try recording again.');
+    } else if (error.code === 'storage/retry-limit-exceeded') {
+      throw new Error('Upload failed after multiple attempts. Please check your connection and try again.');
+    } else if (error.code && error.code.startsWith('storage/')) {
+      throw new Error(`Upload failed: ${error.message || 'Storage error occurred'}`);
+    } else if (error.message && error.message.includes('Firebase')) {
+      throw new Error(`Firebase error: ${error.message}`);
+    } else if (error.message && error.message.includes('auth')) {
+      throw new Error('Authentication error. Please refresh the page and try again.');
+    } else if (error.message && error.message.includes('network')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    } else {
+      // Enhanced fallback error message with more details
+      const errorDetail = error?.message || error?.toString() || 'Unknown error';
+      throw new Error(`Upload failed: ${errorDetail}. Please check browser console for details.`);
+    }
   }
 };
 

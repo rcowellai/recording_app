@@ -1,4 +1,5 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
     // Helper functions for security validation
@@ -10,67 +11,97 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    function isValidAnonymousSession(sessionId) {
-      return isAuthenticated() && 
-             request.auth.token.firebase.sign_in_provider == 'anonymous' &&
-             exists(/databases/$(database)/documents/recordingSessions/$(sessionId)) &&
-             get(/databases/$(database)/documents/recordingSessions/$(sessionId)).data.status == 'active' &&
-             get(/databases/$(database)/documents/recordingSessions/$(sessionId)).data.expiresAt > request.time;
+    function isAnonymousUser() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous';
     }
     
-    // Helper function for Love Retold anonymous updates
+    // Helper function for Love Retold anonymous updates (Recording App)
     function onlyUpdatingFields(fields) {
       return request.resource.data.diff(resource.data).affectedKeys()
         .hasOnly(fields);
     }
     
-    // Users collection - strict user isolation
+    // ==========================================
+    // LOVE RETOLD MAIN APP COLLECTIONS
+    // ==========================================
+    
+    // COLLECTIONS THAT USE PREFIX (dev_ in development)
+    
+    // Users collection - uses prefix in firebaseAuthService
+    match /dev_users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Prompts collection - user-specific access only
-    match /prompts/{promptId} {
-      allow read, write: if isAuthenticated() && 
-                        resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && 
-                   request.resource.data.userId == request.auth.uid;
+    // Storytellers collection - uses prefix in storytellerService  
+    match /dev_user_storytellers/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /user_storytellers/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
     
-    // Recording sessions - Love Retold anonymous access pattern
+    // COLLECTIONS THAT DON'T USE PREFIX
+    
+    // Library collections - NO prefix in firestoreLibraryService
+    match /library_categories/{categoryId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    match /library_prompts/{promptId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // User prompts - NO prefix in promptService
+    match /user_prompts/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Future collections
+    match /user_stories/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ==========================================
+    // RECORDING APP COLLECTIONS  
+    // ==========================================
+    
+    // Recording sessions - ENHANCED: Support for both Love Retold main app AND recording app
     match /recordingSessions/{sessionId} {
-      // Anonymous read access (anyone with link can read)
+      // Anonymous read access (anyone with link can read - for recording app)
       allow read: if true;
       
-      // Anonymous limited writes (status/progress updates only)
-      allow update: if request.auth == null &&
-        onlyUpdatingFields([
+      // RECORDING APP: Anonymous authentication updates (limited fields and status transitions)
+      allow update: if request.auth != null 
+        && request.auth.token.firebase.sign_in_provider == 'anonymous'
+        && resource.data.status in ['pending', 'active', 'recording', 'uploading', 'failed']
+        && request.resource.data.status in ['active', 'recording', 'uploading', 'processing', 'failed']
+        && request.resource.data.userId == resource.data.userId  // Cannot change ownership
+        && request.resource.data.promptId == resource.data.promptId  // Cannot change prompt
+        && request.resource.data.storytellerId == resource.data.storytellerId // Cannot change storyteller
+        && onlyUpdatingFields([
           'status', 'recordingData', 'storagePaths', 
           'recordingStartedAt', 'recordingCompletedAt', 'error'
-        ]) &&
-        resource.data.status in ['pending', 'active', 'recording', 'uploading', 'failed'];
+        ]);
       
-      // Authenticated access for session owner (main app)
-      allow read, write: if isAuthenticated() && 
-                          resource.data.userId == request.auth.uid;
+      // LOVE RETOLD MAIN APP: Authenticated users can create/delete their own sessions
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
       
-      // Create access for authenticated users only (main app)
-      allow create: if isAuthenticated() && 
-                   request.resource.data.userId == request.auth.uid;
+      // LOVE RETOLD MAIN APP: Authenticated users can read/write their own sessions
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
     
-    // Stories collection - strict user isolation
+    // Stories collection - for future use by both apps
     match /stories/{storyId} {
       allow read, write: if isAuthenticated() && 
                         resource.data.userId == request.auth.uid;
       allow create: if isAuthenticated() && 
                    request.resource.data.userId == request.auth.uid;
-    }
-    
-    // System collections (admin only) - for future use
-    match /system/{document=**} {
-      allow read, write: if false; // Admin SDK only
     }
     
     // Analytics collection (write-only for metrics)
