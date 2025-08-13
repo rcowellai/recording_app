@@ -9,6 +9,8 @@ const validateSessionFunction = httpsCallable(functions, 'validateRecordingSessi
  * @returns {Promise<Object>} Session validation result
  */
 export const validateSession = async (sessionId) => {
+  console.log('🔍 validateSession called with sessionId:', sessionId);
+  
   try {
     // Add timeout directly to the Firebase function call
     const timeoutMs = 4000; // 4 seconds (must be shorter than test timeout)
@@ -16,12 +18,66 @@ export const validateSession = async (sessionId) => {
       setTimeout(() => reject(new Error('Firebase function timeout')), timeoutMs);
     });
     
+    console.log('🚀 Calling Firebase function validateRecordingSession...');
+    
     const result = await Promise.race([
       validateSessionFunction({ sessionId }),
       timeoutPromise
     ]);
     
-    return result.data;
+    // Log the complete response structure to understand what we're getting
+    console.log('📥 Complete Firebase function response:', JSON.stringify(result, null, 2));
+    console.log('📥 Response data field:', result?.data);
+    console.log('📥 Response data type:', typeof result?.data);
+    
+    // Handle both response formats:
+    // Love Retold main app format: { data: { valid: true, session: {...} } }
+    // Recording app format: { data: { isValid: true, status: 'pending', message: '...' } }
+    if (result && result.data) {
+      const data = result.data;
+      console.log('✅ Processing valid response data:', data);
+      
+      let transformedResponse;
+      
+      // Check if this is the Love Retold main app response format
+      if (data.valid !== undefined && data.session) {
+        console.log('📱 Detected Love Retold main app response format');
+        // Transform from main app format to recording app format
+        transformedResponse = {
+          status: data.session.status || 'pending',
+          message: 'Session is valid and ready for recording',
+          isValid: data.valid,
+          sessionData: {
+            questionText: data.session.promptText || data.session.questionText,
+            createdAt: data.session.createdAt,
+            expiresAt: data.session.expiresAt,
+          },
+          // Include the full session data
+          session: data.session
+        };
+      } else {
+        console.log('🔧 Detected Recording app response format');
+        // This is our recording app format
+        transformedResponse = {
+          status: data.status || 'unknown',
+          message: data.message || 'Unknown status',
+          isValid: data.isValid || false,
+          sessionData: data.sessionData || null,
+          // Include any additional data from the original response
+          ...data
+        };
+      }
+      
+      console.log('🔄 Transformed response:', transformedResponse);
+      return transformedResponse;
+    }
+    
+    // Fallback if no data
+    console.warn('⚠️ No data field in response, using fallback');
+    return {
+      status: 'error',
+      message: 'No data received from server'
+    };
   } catch (error) {
     console.error('Error validating session:', error);
     

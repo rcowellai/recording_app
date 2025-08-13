@@ -130,7 +130,7 @@ export const validateSession = functions.https.onCall<ValidateSessionRequest, Pr
         status: sessionData.status === 'pending' ? 'pending' : 'active',
         message: 'Session is valid and ready for recording',
         sessionData: {
-          questionText: sessionData.questionText,
+          questionText: sessionData.promptText || sessionData.questionText,
           createdAt: sessionData.createdAt,
           expiresAt: sessionData.expiresAt,
         },

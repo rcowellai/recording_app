@@ -43,7 +43,8 @@
       "Bash(rm:*)",
       "Bash(git log:*)",
       "Bash(cp:*)",
-      "Bash(timeout 5 firebase functions:log --only validateRecordingSession)"
+      "Bash(timeout 5 firebase functions:log --only validateRecordingSession)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
